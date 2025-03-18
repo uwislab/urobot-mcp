@@ -1,5 +1,10 @@
 import pygame
 import math
+import http.server
+import socketserver
+import threading
+import base64
+import ctypes
 
 # 初始化pygame
 pygame.init()
@@ -21,9 +26,11 @@ YELLOW = (255, 255, 0)
 
 # 机器人类
 class Robot:
-    def __init__(self, x, y):
+    def __init__(self, x, y, robot_id):
         self.x = x
         self.y = y
+        self.id = robot_id
+        self.active = True
         self.width = 40
         self.height = 60
         self.speed = 4
@@ -79,6 +86,9 @@ class Robot:
         self._move()
         
     def _move(self):
+        if not self.active:
+            return
+            
         # 计算新位置
         new_x = self.x + self.direction[0] * self.speed
         new_y = self.y + self.direction[1] * self.speed
@@ -105,10 +115,89 @@ class Robot:
         self.x = new_x
         self.y = new_y
 
+class RobotManager:
+    def __init__(self):
+        self.robots = []
+        self.lock = threading.Lock()
+        
+    def add_robot(self, x, y):
+        robot_id = len(self.robots)
+        robot = Robot(x, y, robot_id)
+        self.robots.append(robot)
+        return robot_id
+        
+    def get_robot(self, robot_id):
+        return self.robots[robot_id]
+        
+    def check_collisions(self):
+        with self.lock:
+            for i in range(len(self.robots)):
+                for j in range(i+1, len(self.robots)):
+                    r1 = self.robots[i]
+                    r2 = self.robots[j]
+                    if (abs(r1.x - r2.x) < r1.width and 
+                        abs(r1.y - r2.y) < r1.height):
+                        r1.active = False
+                        r2.active = False
+
+class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith('/robot.html'):
+            params = self.path.split('?')[1].split('&')
+            cmd = None
+            robot_id = None
+            for param in params:
+                if param.startswith('cmd='):
+                    cmd = param[4:]
+                elif param.startswith('id='):
+                    robot_id = int(param[3:])
+            
+            if cmd and robot_id is not None:
+                try:
+                    # Decode base64 and execute C code
+                    c_code = base64.b64decode(cmd).decode('utf-8')
+                    self.execute_c_code(robot_id, c_code)
+                    self.send_response(200)
+                except Exception as e:
+                    self.send_response(500)
+                    print(f"Error executing command: {e}")
+                finally:
+                    self.end_headers()
+        else:
+            self.send_response(404)
+            self.end_headers()
+            
+    def execute_c_code(self, robot_id, c_code):
+        # Create C function from code
+        c_func = ctypes.CFUNCTYPE(None)
+        c_code = f"void func() {{ {c_code} }}"
+        lib = ctypes.CDLL(None)
+        libc = ctypes.CDLL("libc.so.6")
+        libc.free.argtypes = [ctypes.c_void_p]
+        
+        # Compile and execute
+        src = ctypes.c_char_p(c_code.encode('utf-8'))
+        libc.free(src)
+        
+        # Get robot and execute command
+        robot = robot_manager.get_robot(robot_id)
+        # Here you would map C functions to robot actions
+        # For example: move_up() -> robot.move_up()
+        
+def start_http_server():
+    PORT = 8000
+    with socketserver.TCPServer(("", PORT), HTTPRequestHandler) as httpd:
+        print(f"Serving at port {PORT}")
+        httpd.serve_forever()
+
 # 主循环
 def main():
     clock = pygame.time.Clock()
-    robot = Robot(WIDTH//2, HEIGHT//2)
+    robot_manager = RobotManager()
+    
+    # Add initial robots
+    robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
+    robot_manager.add_robot(WIDTH//2 + 100, HEIGHT//2)
     
     running = True
     while running:
@@ -116,20 +205,13 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
                 
-        # 获取按键状态
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
-            robot.move_up()
-        if keys[pygame.K_DOWN]:
-            robot.move_down()
-        if keys[pygame.K_LEFT]:
-            robot.move_left()
-        if keys[pygame.K_RIGHT]:
-            robot.move_right()
+        # 检查碰撞
+        robot_manager.check_collisions()
             
         # 绘制场景
         screen.fill(WHITE)
-        robot.draw(screen)
+        for robot in robot_manager.robots:
+            robot.draw(screen)
         pygame.display.flip()
         
         clock.tick(60)
@@ -137,4 +219,10 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
+    # Start HTTP server in separate thread
+    http_thread = threading.Thread(target=start_http_server)
+    http_thread.daemon = True
+    http_thread.start()
+    
+    # Start main loop
     main()
