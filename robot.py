@@ -92,6 +92,40 @@ class Robot:
         # 计算新位置
         new_x = self.x + self.direction[0] * self.speed
         new_y = self.y + self.direction[1] * self.speed
+
+    def forward(self, speed, distance):
+        self.speed = min(8, max(1, speed)) / 2
+        steps = distance * 10
+        for _ in range(steps):
+            self._move()
+            pygame.time.wait(50)
+
+    def back(self, speed, distance):
+        self.speed = min(8, max(1, speed)) / 2
+        steps = distance * 10
+        for _ in range(steps):
+            self.x -= self.direction[0] * self.speed
+            self.y -= self.direction[1] * self.speed
+            pygame.time.wait(50)
+
+    def turn_left(self, degrees):
+        self.angle = (self.angle + degrees) % 360
+        pygame.time.wait(degrees * 10)
+
+    def turn_right(self, degrees):
+        self.angle = (self.angle - degrees) % 360
+        pygame.time.wait(degrees * 10)
+
+    def gpp_say(self, mode, text):
+        if mode == 0:
+            # Interrupt current speech
+            print(f"[SPEECH INTERRUPT] {text}")
+        else:
+            # Queue speech
+            print(f"[SPEECH] {text}")
+
+    def beep(self, frequency, duration):
+        print(f"[BEEP] {frequency}Hz for {duration}ms")
         
         # 检查是否碰撞墙壁
         if new_x < WALL_THICKNESS:
@@ -171,21 +205,58 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             
     def execute_c_code(self, robot_id, c_code):
-        # Create C function from code
-        c_func = ctypes.CFUNCTYPE(None)
-        c_code = f"void func() {{ {c_code} }}"
-        lib = ctypes.CDLL(None)
-        libc = ctypes.CDLL("libc.so.6")
-        libc.free.argtypes = [ctypes.c_void_p]
-        
-        # Compile and execute
-        src = ctypes.c_char_p(c_code.encode('utf-8'))
-        libc.free(src)
-        
-        # Get robot and execute command
         robot = self.robot_manager.get_robot(robot_id)
-        # Here you would map C functions to robot actions
-        # For example: move_up() -> robot.move_up()
+        
+        # Simple C-like interpreter
+        lines = c_code.split('\n')
+        for line in lines:
+            line = line.strip()
+            
+            # Handle function calls
+            if line.startswith('forward('):
+                params = line[8:-1].split(',')
+                robot.forward(int(params[0]), int(params[1]))
+            elif line.startswith('back('):
+                params = line[5:-1].split(',')
+                robot.back(int(params[0]), int(params[1]))
+            elif line.startswith('turn_left('):
+                robot.turn_left(int(line[10:-1]))
+            elif line.startswith('turn_right('):
+                robot.turn_right(int(line[11:-1]))
+            elif line.startswith('gpp_say('):
+                params = line[8:-1].split(',')
+                mode = int(params[0])
+                text = params[1].strip().strip('"')
+                robot.gpp_say(mode, text)
+            elif line.startswith('beep('):
+                params = line[5:-1].split(',')
+                robot.beep(int(params[0]), int(params[1]))
+            
+            # Handle variable declarations
+            elif line.startswith('int ') or line.startswith('float '):
+                # Skip variable declarations
+                continue
+                
+            # Handle loops
+            elif 'for ' in line:
+                # Simple for loop support
+                parts = line.split(';')
+                init = parts[0][4:].strip()
+                condition = parts[1].strip()
+                increment = parts[2][:-1].strip()
+                
+                # Execute initialization
+                if '=' in init:
+                    var, val = init.split('=')
+                    locals()[var.strip()] = int(val.strip())
+                    
+                # Execute loop
+                while eval(condition):
+                    # Execute loop body
+                    pass
+                    
+                    # Execute increment
+                    exec(increment)
         
 def start_http_server(robot_manager):
     PORT = 8000
