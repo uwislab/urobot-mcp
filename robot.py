@@ -4,8 +4,11 @@ import math
 # 初始化pygame
 pygame.init()
 
-# 屏幕尺寸
+# 屏幕尺寸和墙壁
 WIDTH, HEIGHT = 800, 600
+WALL_THICKNESS = 20
+PLAY_AREA = pygame.Rect(WALL_THICKNESS, WALL_THICKNESS, 
+                       WIDTH - 2*WALL_THICKNESS, HEIGHT - 2*WALL_THICKNESS)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("机器人仿真")
 
@@ -14,6 +17,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
 
 # 机器人类
 class Robot:
@@ -22,46 +26,84 @@ class Robot:
         self.y = y
         self.width = 40
         self.height = 60
-        self.speed = 4  # 提高移动速度
+        self.speed = 4
+        self.direction = [0, 0]  # 运动方向 [x, y]
+        self.angle = 0  # 当前角度
         
     def draw(self, screen):
-        # 绘制圆形底盘
-        center_x = self.x + self.width/2
-        center_y = self.y + self.height/2
-        pygame.draw.circle(screen, (100, 100, 100), (int(center_x), int(center_y + 10)), 30)  # 灰色底盘
+        # 绘制墙壁
+        pygame.draw.rect(screen, BLACK, (0, 0, WIDTH, WALL_THICKNESS))  # 上墙
+        pygame.draw.rect(screen, BLACK, (0, 0, WALL_THICKNESS, HEIGHT))  # 左墙
+        pygame.draw.rect(screen, BLACK, (WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, HEIGHT))  # 右墙
+        pygame.draw.rect(screen, BLACK, (0, HEIGHT - WALL_THICKNESS, WIDTH, WALL_THICKNESS))  # 下墙
         
-        # 绘制主体
-        body_rect = pygame.Rect(self.x + 10, self.y, 20, 40)
-        pygame.draw.rect(screen, (0, 128, 255), body_rect)  # 浅蓝色主体
-        pygame.draw.rect(screen, BLACK, body_rect, 2)  # 黑色边框
+        # 创建旋转后的表面
+        robot_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         
-        # 绘制天线
-        pygame.draw.line(screen, RED, 
-                        (center_x - 5, self.y),
-                        (center_x - 5, self.y - 15), 2)
-        pygame.draw.circle(screen, RED, (int(center_x - 5), int(self.y - 15)), 3)
+        # 绘制车身
+        pygame.draw.rect(robot_surface, (0, 128, 255), (10, 0, 20, 40))  # 浅蓝色主体
+        pygame.draw.rect(robot_surface, BLACK, (10, 0, 20, 40), 2)  # 黑色边框
         
         # 绘制轮子
-        pygame.draw.circle(screen, BLACK, (int(self.x + 5), int(self.y + 50)), 8)
-        pygame.draw.circle(screen, BLACK, (int(self.x + 35), int(self.y + 50)), 8)
+        pygame.draw.circle(robot_surface, BLACK, (15, 50), 8)
+        pygame.draw.circle(robot_surface, BLACK, (25, 50), 8)
         
-        # 绘制眼睛
-        pygame.draw.circle(screen, WHITE, (int(center_x - 5), int(self.y + 15)), 3)
-        pygame.draw.circle(screen, WHITE, (int(center_x + 5), int(self.y + 15)), 3)
-        pygame.draw.circle(screen, BLACK, (int(center_x - 5), int(self.y + 15)), 1)
-        pygame.draw.circle(screen, BLACK, (int(center_x + 5), int(self.y + 15)), 1)
+        # 绘制前灯
+        pygame.draw.circle(robot_surface, YELLOW, (20, 5), 3)
+        
+        # 旋转表面
+        rotated_surface = pygame.transform.rotate(robot_surface, self.angle)
+        new_rect = rotated_surface.get_rect(center=(self.x + self.width/2, self.y + self.height/2))
+        
+        # 绘制到屏幕上
+        screen.blit(rotated_surface, new_rect.topleft)
         
     def move_up(self):
-        self.y -= self.speed
+        self.direction = [0, -1]
+        self.angle = 0
+        self._move()
         
     def move_down(self):
-        self.y += self.speed
+        self.direction = [0, 1]
+        self.angle = 180
+        self._move()
         
     def move_left(self):
-        self.x -= self.speed
+        self.direction = [-1, 0]
+        self.angle = 90
+        self._move()
         
     def move_right(self):
-        self.x += self.speed
+        self.direction = [1, 0]
+        self.angle = 270
+        self._move()
+        
+    def _move(self):
+        # 计算新位置
+        new_x = self.x + self.direction[0] * self.speed
+        new_y = self.y + self.direction[1] * self.speed
+        
+        # 检查是否碰撞墙壁
+        if new_x < WALL_THICKNESS:
+            self.direction[0] *= -1
+            self.angle = 270 if self.angle == 90 else 90
+            new_x = WALL_THICKNESS
+        elif new_x + self.width > WIDTH - WALL_THICKNESS:
+            self.direction[0] *= -1
+            self.angle = 270 if self.angle == 90 else 90
+            new_x = WIDTH - WALL_THICKNESS - self.width
+            
+        if new_y < WALL_THICKNESS:
+            self.direction[1] *= -1
+            self.angle = 0 if self.angle == 180 else 180
+            new_y = WALL_THICKNESS
+        elif new_y + self.height > HEIGHT - WALL_THICKNESS:
+            self.direction[1] *= -1
+            self.angle = 0 if self.angle == 180 else 180
+            new_y = HEIGHT - WALL_THICKNESS - self.height
+            
+        self.x = new_x
+        self.y = new_y
 
 # 主循环
 def main():
