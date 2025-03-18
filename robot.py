@@ -141,6 +141,9 @@ class RobotManager:
                         r2.active = False
 
 class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        self.robot_manager = kwargs.pop('robot_manager')
+        super().__init__(*args, **kwargs)
     def do_GET(self):
         if self.path.startswith('/robot.html'):
             params = self.path.split('?')[1].split('&')
@@ -180,13 +183,14 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         libc.free(src)
         
         # Get robot and execute command
-        robot = robot_manager.get_robot(robot_id)
+        robot = self.robot_manager.get_robot(robot_id)
         # Here you would map C functions to robot actions
         # For example: move_up() -> robot.move_up()
         
-def start_http_server():
+def start_http_server(robot_manager):
     PORT = 8000
-    with socketserver.TCPServer(("", PORT), HTTPRequestHandler) as httpd:
+    handler = lambda *args, **kwargs: HTTPRequestHandler(*args, robot_manager=robot_manager, **kwargs)
+    with socketserver.TCPServer(("", PORT), handler) as httpd:
         print(f"Serving at port {PORT}")
         httpd.serve_forever()
 
@@ -219,8 +223,11 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
+    # Create robot manager
+    robot_manager = RobotManager()
+    
     # Start HTTP server in separate thread
-    http_thread = threading.Thread(target=start_http_server)
+    http_thread = threading.Thread(target=start_http_server, args=(robot_manager,))
     http_thread.daemon = True
     http_thread.start()
     
