@@ -93,6 +93,28 @@ class Robot:
         new_x = self.x + self.direction[0] * self.speed
         new_y = self.y + self.direction[1] * self.speed
 
+        # 检查是否碰撞墙壁
+        if new_x < WALL_THICKNESS:
+            self.direction[0] *= -1
+            self.angle = 270 if self.angle == 90 else 90
+            new_x = WALL_THICKNESS
+        elif new_x + self.width > WIDTH - WALL_THICKNESS:
+            self.direction[0] *= -1
+            self.angle = 270 if self.angle == 90 else 90
+            new_x = WIDTH - WALL_THICKNESS - self.width
+            
+        if new_y < WALL_THICKNESS:
+            self.direction[1] *= -1
+            self.angle = 0 if self.angle == 180 else 180
+            new_y = WALL_THICKNESS
+        elif new_y + self.height > HEIGHT - WALL_THICKNESS:
+            self.direction[1] *= -1
+            self.angle = 0 if self.angle == 180 else 180
+            new_y = HEIGHT - WALL_THICKNESS - self.height
+            
+        self.x = new_x
+        self.y = new_y
+
     def forward(self, speed, distance):
         self.speed = min(8, max(1, speed)) / 2
         steps = distance * 10
@@ -126,28 +148,6 @@ class Robot:
 
     def beep(self, frequency, duration):
         print(f"[BEEP] {frequency}Hz for {duration}ms")
-        
-        # 检查是否碰撞墙壁
-        if new_x < WALL_THICKNESS:
-            self.direction[0] *= -1
-            self.angle = 270 if self.angle == 90 else 90
-            new_x = WALL_THICKNESS
-        elif new_x + self.width > WIDTH - WALL_THICKNESS:
-            self.direction[0] *= -1
-            self.angle = 270 if self.angle == 90 else 90
-            new_x = WIDTH - WALL_THICKNESS - self.width
-            
-        if new_y < WALL_THICKNESS:
-            self.direction[1] *= -1
-            self.angle = 0 if self.angle == 180 else 180
-            new_y = WALL_THICKNESS
-        elif new_y + self.height > HEIGHT - WALL_THICKNESS:
-            self.direction[1] *= -1
-            self.angle = 0 if self.angle == 180 else 180
-            new_y = HEIGHT - WALL_THICKNESS - self.height
-            
-        self.x = new_x
-        self.y = new_y
 
 class RobotManager:
     def __init__(self):
