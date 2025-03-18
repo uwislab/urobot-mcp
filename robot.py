@@ -299,10 +299,11 @@ def main():
     robot_manager = RobotManager()
     
     # Add initial robots
-    robot = robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
+    robot_id = robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
     robot_manager.add_robot(WIDTH//2 + 100, HEIGHT//2)
     
     # 添加测试动作
+    robot = robot_manager.get_robot(robot_id)
     robot.forward(4, 10)
     robot.turn_right(90)
     robot.forward(4, 10)
