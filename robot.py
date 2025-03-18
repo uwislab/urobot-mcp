@@ -22,17 +22,34 @@ class Robot:
         self.y = y
         self.width = 40
         self.height = 60
-        self.speed = 2
-        self.angle = 0  # 朝向角度
+        self.speed = 4  # 提高移动速度
         
     def draw(self, screen):
-        # 绘制机器人主体
-        pygame.draw.rect(screen, BLUE, (self.x, self.y, self.width, self.height))
-        
-        # 绘制机器人中心点
+        # 绘制圆形底盘
         center_x = self.x + self.width/2
         center_y = self.y + self.height/2
-        pygame.draw.circle(screen, RED, (int(center_x), int(center_y)), 5)
+        pygame.draw.circle(screen, (100, 100, 100), (int(center_x), int(center_y + 10)), 30)  # 灰色底盘
+        
+        # 绘制主体
+        body_rect = pygame.Rect(self.x + 10, self.y, 20, 40)
+        pygame.draw.rect(screen, (0, 128, 255), body_rect)  # 浅蓝色主体
+        pygame.draw.rect(screen, BLACK, body_rect, 2)  # 黑色边框
+        
+        # 绘制天线
+        pygame.draw.line(screen, RED, 
+                        (center_x - 5, self.y),
+                        (center_x - 5, self.y - 15), 2)
+        pygame.draw.circle(screen, RED, (int(center_x - 5), int(self.y - 15)), 3)
+        
+        # 绘制轮子
+        pygame.draw.circle(screen, BLACK, (int(self.x + 5), int(self.y + 50)), 8)
+        pygame.draw.circle(screen, BLACK, (int(self.x + 35), int(self.y + 50)), 8)
+        
+        # 绘制眼睛
+        pygame.draw.circle(screen, WHITE, (int(center_x - 5), int(self.y + 15)), 3)
+        pygame.draw.circle(screen, WHITE, (int(center_x + 5), int(self.y + 15)), 3)
+        pygame.draw.circle(screen, BLACK, (int(center_x - 5), int(self.y + 15)), 1)
+        pygame.draw.circle(screen, BLACK, (int(center_x + 5), int(self.y + 15)), 1)
         
     def move_up(self):
         self.y -= self.speed
