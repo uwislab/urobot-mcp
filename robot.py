@@ -44,6 +44,20 @@ class Robot:
         pygame.draw.rect(screen, BLACK, (WIDTH - WALL_THICKNESS, 0, WALL_THICKNESS, HEIGHT))  # 右墙
         pygame.draw.rect(screen, BLACK, (0, HEIGHT - WALL_THICKNESS, WIDTH, WALL_THICKNESS))  # 下墙
         
+        # 在底部显示IP和端口信息
+        font = pygame.font.SysFont('simhei', 20)
+        info_text = f"服务器: localhost:8080"
+        text_surface = font.render(info_text, True, BLACK)
+        text_rect = text_surface.get_rect(center=(WIDTH//2, HEIGHT - 30))
+        screen.blit(text_surface, text_rect)
+        
+        # 显示最后接收到的命令
+        if hasattr(self, 'last_command'):
+            cmd_text = f"最后命令: {self.last_command}"
+            cmd_surface = font.render(cmd_text, True, BLACK)
+            cmd_rect = cmd_surface.get_rect(center=(WIDTH//2, HEIGHT - 10))
+            screen.blit(cmd_surface, cmd_rect)
+        
         # 创建旋转后的表面
         robot_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         
@@ -192,6 +206,7 @@ class RobotManager:
 class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.robot_manager = kwargs.pop('robot_manager')
+        self.last_command = ""
         super().__init__(*args, **kwargs)
     def do_GET(self):
         if self.path.startswith('/robot.html'):
@@ -221,6 +236,7 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
     def execute_c_code(self, robot_id, c_code):
         robot = self.robot_manager.get_robot(robot_id)
+        self.last_command = c_code  # 保存最后接收到的命令
         
         # Simple C-like interpreter
         lines = c_code.split('\n')
