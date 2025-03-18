@@ -166,11 +166,26 @@ class RobotManager:
     def check_collisions(self):
         with self.lock:
             for i in range(len(self.robots)):
+                r1 = self.robots[i]
+                if not r1.active:
+                    continue
+                    
+                # Check wall collisions
+                if (r1.x < WALL_THICKNESS or 
+                    r1.x + r1.width > WIDTH - WALL_THICKNESS or
+                    r1.y < WALL_THICKNESS or 
+                    r1.y + r1.height > HEIGHT - WALL_THICKNESS):
+                    r1.active = False
+                    continue
+                    
+                # Check robot collisions
                 for j in range(i+1, len(self.robots)):
-                    r1 = self.robots[i]
                     r2 = self.robots[j]
-                    if (abs(r1.x - r2.x) < r1.width and 
-                        abs(r1.y - r2.y) < r1.height):
+                    if not r2.active:
+                        continue
+                        
+                    if (abs(r1.x - r2.x) < (r1.width + r2.width)/2 and 
+                        abs(r1.y - r2.y) < (r1.height + r2.height)/2):
                         r1.active = False
                         r2.active = False
 
@@ -231,6 +246,19 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             elif line.startswith('beep('):
                 params = line[5:-1].split(',')
                 robot.beep(int(params[0]), int(params[1]))
+            elif line.startswith('stop('):
+                robot.speed = 0
+            elif line.startswith('set_speed('):
+                speed = int(line[10:-1])
+                robot.speed = min(8, max(1, speed))
+            elif line.startswith('get_position()'):
+                x = int(robot.x)
+                y = int(robot.y)
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(f'{{"x":{x},"y":{y}}}'.encode())
+                return
             
             # Handle variable declarations
             elif line.startswith('int ') or line.startswith('float '):
