@@ -287,7 +287,7 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     exec(increment)
         
 def start_http_server(robot_manager):
-    PORT = 8000
+    PORT = 8080  # 改用8080端口
     handler = lambda *args, **kwargs: HTTPRequestHandler(*args, robot_manager=robot_manager, **kwargs)
     with socketserver.TCPServer(("", PORT), handler) as httpd:
         print(f"Serving at port {PORT}")
@@ -299,8 +299,13 @@ def main():
     robot_manager = RobotManager()
     
     # Add initial robots
-    robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
+    robot = robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
     robot_manager.add_robot(WIDTH//2 + 100, HEIGHT//2)
+    
+    # 添加测试动作
+    robot.forward(4, 10)
+    robot.turn_right(90)
+    robot.forward(4, 10)
     
     running = True
     while running:
