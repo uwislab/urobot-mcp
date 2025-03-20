@@ -30,25 +30,17 @@ def new_page():
 def run_script():
     try:
         # 执行指定的Python脚本
-        # Import and run the script directly instead of subprocess
         from script3 import generate_c_code
         output = generate_c_code()
         return jsonify({
             'message': output,
             'error': ''
         })
-        return jsonify({
-            'message': result.stdout,
-            'error': result.stderr
-        })
-    except subprocess.CalledProcessError as e:
+    except Exception as e:
         return jsonify({
             'error': str(e),
-            'message': e.stdout,
-            'stderr': e.stderr
+            'message': ''
         }), 500
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
