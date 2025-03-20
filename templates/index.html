@@ -7,81 +7,120 @@
     <title>调用Ollama</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-image: url('static/background.png');
-            background-size: cover;
-            background-repeat: no-repeat;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            width: 100%;
-        }
-
-       .container {
-            background-color: white;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
-       .input-group {
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #2a5298;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .input-group {
             display: flex;
             align-items: center;
-            width: 100%;
+            gap: 10px;
+            margin-bottom: 1rem;
         }
 
         input[type="text"] {
             flex: 1;
-            padding: 10px;
-            margin-right: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #2a5298;
         }
 
         button {
-            background-color: #007BFF;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 3px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         #result {
-            margin-top: 10px;
-            white-space: pre-line;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', monospace;
+            overflow-x: auto;
         }
 
-       .input-group img {
-            height: calc(100% - 2px);
-            margin-right: 10px;
-            border: 1px solid transparent;
-            border-radius: 3px;
+        .input-group img {
             height: 90px;
             width: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        /* 语音图标样式 */
         #speechInputIcon {
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             cursor: pointer;
-            margin: 10px;
+            padding: 8px;
             border-radius: 50%;
-            padding: 5px;
-            transition: background-color 0.3s;
+            background: #f0f0f0;
+            transition: all 0.3s ease;
         }
 
         #speechInputIcon:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+            background: #e0e0e0;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
         }
     </style>
 </head>
