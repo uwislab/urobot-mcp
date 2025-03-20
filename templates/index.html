@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调用Ollama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('static/background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            width: 100%;
+        }
+
+       .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+       .input-group {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #result {
+            margin-top: 10px;
+            white-space: pre-line;
+        }
+
+       .input-group img {
+            height: calc(100% - 2px);
+            margin-right: 10px;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            height: 90px;
+            width: 100px;
+        }
+
+        /* 语音图标样式 */
+        #speechInputIcon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 50%;
+            padding: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #speechInputIcon:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="input-group">
+            <img src="static/ollama.png" alt="输入框图片">
+            <input type="text" id="promptInput" placeholder="请输入提示词">
+            <!-- 替换为语音图标 -->
+            <img id="speechInputIcon" src="static/microphone.png" alt="语音输入">
+            <button id="callOllamaButton">发送</button>
+        </div>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('promptInput');
+        const callOllamaButton = document.getElementById('callOllamaButton');
+        const speechInputIcon = document.getElementById('speechInputIcon');
+
+        speechInputIcon.addEventListener('click', function () {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = 'zh-CN';
+                recognition.onresult = function (event) {
+                    const transcript = event.results[0][0].transcript;
+                    promptInput.value = transcript;
+                };
+                recognition.start();
+            } else {
+                alert('你的浏览器不支持语音识别功能。');
+            }
+        });
+
+        callOllamaButton.addEventListener('click', async function () {
+            const prompt = promptInput.value;
+            const response = await fetch('/call_ollama', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ prompt: prompt })
+            });
+            const data = await response.json();
+            document.getElementById('result').innerText = data.result;
+        });
+    </script>
+</body>
+
+</html>
