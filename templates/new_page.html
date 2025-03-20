@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('static/background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            width: 100%;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>新页面</h2>
+        <button id="runScriptButton">运行Python脚本</button>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        const runScriptButton = document.getElementById('runScriptButton');
+        const resultText = document.getElementById('result');
+
+        runScriptButton.addEventListener('click', async function () {
+            try {
+                const response = await fetch('/run_script', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                resultText.innerText = data.message || "脚本执行成功";
+            } catch (error) {
+                resultText.innerText = "脚本执行出错：" + error.message;
+            }
+        });
+    </script>
+</body>
+
+</html>
