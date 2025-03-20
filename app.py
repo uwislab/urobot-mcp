@@ -31,7 +31,7 @@ def run_script():
     try:
         # 执行指定的Python脚本
         result = subprocess.run(
-            ['python', 'E:\\py\\Py可视化窗口\\script3.py'],
+            ['python', 'E:\\py\\flask\\script3.py'],
             capture_output=True,
             text=True,
             check=True

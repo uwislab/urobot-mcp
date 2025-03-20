@@ -61,7 +61,14 @@
                     method: 'POST'
                 });
                 const data = await response.json();
-                resultText.innerText = data.message || "脚本执行成功";
+                let output = "";
+                if (data.message) {
+                    output += data.message;
+                }
+                if (data.error) {
+                    output += "\n错误信息: " + data.error;
+                }
+                resultText.innerText = output || "脚本执行成功";
             } catch (error) {
                 resultText.innerText = "脚本执行出错：" + error.message;
             }
