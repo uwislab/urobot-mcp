@@ -26,12 +26,27 @@ def call_ollama():
 def new_page():
     return render_template('new_page.html')
 
-@app.route('/run_script', methods=['POST'])
-def run_script():
+@app.route('/run_script3', methods=['POST'])
+def run_script3():
     try:
         # 执行指定的Python脚本
         from script3 import generate_c_code
         output = generate_c_code()
+        return jsonify({
+            'message': output,
+            'error': ''
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': ''
+        }), 500
+
+@app.route('/run_script4', methods=['POST'])
+def run_script4():
+    try:
+        from script4 import generate_plantuml
+        output = generate_plantuml()
         return jsonify({
             'message': output,
             'error': ''

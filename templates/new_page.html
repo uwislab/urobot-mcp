@@ -47,7 +47,8 @@
 <body>
     <div class="container">
         <h2>新页面</h2>
-        <button id="runScriptButton">运行Python脚本</button>
+        <button id="runScript3Button">生成C代码</button>
+        <button id="runScript4Button">生成PlantUML</button>
         <button onclick="window.location.href='/'">返回首页</button>
         <div id="output" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: left; white-space: pre-wrap;">
             <pre id="result" style="margin: 0;"></pre>
@@ -55,12 +56,13 @@
     </div>
 
     <script>
-        const runScriptButton = document.getElementById('runScriptButton');
+        const runScript3Button = document.getElementById('runScript3Button');
+        const runScript4Button = document.getElementById('runScript4Button');
         const resultText = document.getElementById('result');
 
-        runScriptButton.addEventListener('click', async function () {
+        async function runScript(endpoint) {
             try {
-                const response = await fetch('/run_script', {
+                const response = await fetch(endpoint, {
                     method: 'POST'
                 });
                 const data = await response.json();
@@ -79,6 +81,14 @@
             } catch (error) {
                 resultText.innerText = "脚本执行出错：\n" + error.message;
             }
+        }
+
+        runScript3Button.addEventListener('click', async function () {
+            await runScript('/run_script3');
+        });
+
+        runScript4Button.addEventListener('click', async function () {
+            await runScript('/run_script4');
         });
     </script>
 </body>
