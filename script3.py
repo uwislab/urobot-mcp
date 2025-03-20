@@ -39,7 +39,7 @@ def generate_c_code():
             with open(save_path, 'w', encoding='utf-8') as f:
                 f.write(code)
             
-            return f"代码已成功生成并保存到 {save_path}"
+            return f"代码已成功生成并保存到 {save_path}\n\n生成的代码内容：\n{code}"
         else:
             return "未能成功生成代码"
             

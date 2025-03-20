@@ -30,12 +30,13 @@ def new_page():
 def run_script():
     try:
         # 执行指定的Python脚本
-        result = subprocess.run(
-            ['python', 'E:\\py\\flask\\script3.py'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        # Import and run the script directly instead of subprocess
+        from script3 import generate_c_code
+        output = generate_c_code()
+        return jsonify({
+            'message': output,
+            'error': ''
+        })
         return jsonify({
             'message': result.stdout,
             'error': result.stderr
