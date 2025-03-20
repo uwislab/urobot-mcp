@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
-import  ollama
+import ollama
+import subprocess
 
 app = Flask(__name__)
 
@@ -20,6 +21,33 @@ def call_ollama():
         return jsonify({"result": response["message"]["content"]})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/new_page')
+def new_page():
+    return render_template('new_page.html')
+
+@app.route('/run_script', methods=['POST'])
+def run_script():
+    try:
+        # 执行指定的Python脚本
+        result = subprocess.run(
+            ['python', 'E:\\py\\Py可视化窗口\\script3.py'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return jsonify({
+            'message': result.stdout,
+            'error': result.stderr
+        })
+    except subprocess.CalledProcessError as e:
+        return jsonify({
+            'error': str(e),
+            'message': e.stdout,
+            'stderr': e.stderr
+        }), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
