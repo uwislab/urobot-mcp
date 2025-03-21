@@ -221,9 +221,18 @@
                 copyBtn.className = 'copy-btn';
                 copyBtn.textContent = '复制';
                 copyBtn.onclick = () => {
-                    navigator.clipboard.writeText(resultDiv.innerText)
-                        .then(() => alert('已复制到剪贴板'))
-                        .catch(() => alert('复制失败'));
+                    try {
+                        const text = resultDiv.innerText;
+                        const textarea = document.createElement('textarea');
+                        textarea.value = text;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        alert('已复制到剪贴板');
+                    } catch (err) {
+                        alert('复制失败');
+                    }
                 };
                 resultDiv.appendChild(copyBtn);
             }
