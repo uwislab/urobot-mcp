@@ -173,7 +173,9 @@
                 recognition.lang = 'zh-CN';
                 recognition.onresult = function (event) {
                     const transcript = event.results[0][0].transcript;
-                    promptInput.value = transcript;
+                    // 去除句号并追加到现有内容
+                    const cleanText = transcript.replace(/。/g, '');
+                    promptInput.value = (promptInput.value + ' ' + cleanText).trim();
                 };
                 recognition.start();
             } else {
