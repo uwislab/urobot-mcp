@@ -93,37 +93,7 @@
             font-family: 'Consolas', monospace;
             overflow-x: auto;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            position: relative;
         }
-
-        .char-counter {
-            font-size: 0.8rem;
-            color: #666;
-            margin-left: 10px;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #2a5298;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-        }
-
-        .copy-btn:hover {
-            background: #1e3c72;
-        }
-
-        /* 语法高亮样式 */
-        .hl-keyword { color: #0077aa; }
-        .hl-string { color: #669900; }
-        .hl-number { color: #990055; }
-        .hl-comment { color: #999; font-style: italic; }
 
         .input-group img {
             height: 90px;
@@ -183,8 +153,7 @@
     <div class="container">
         <div class="input-group">
             <img src="static/ollama.png" alt="输入框图片">
-            <input type="text" id="promptInput" placeholder="请输入提示词" maxlength="500">
-            <div class="char-counter" id="charCounter">0/500</div>
+            <input type="text" id="promptInput" placeholder="请输入提示词">
             <img id="speechInputIcon" src="static/microphone.png" alt="语音输入">
             <button id="callOllamaButton">发送</button>
             <button onclick="window.location.href='/new_page'">转到deepseek调用</button>
@@ -196,47 +165,6 @@
         const promptInput = document.getElementById('promptInput');
         const callOllamaButton = document.getElementById('callOllamaButton');
         const speechInputIcon = document.getElementById('speechInputIcon');
-        const charCounter = document.getElementById('charCounter');
-
-        // 字符计数器
-        promptInput.addEventListener('input', () => {
-            charCounter.textContent = `${promptInput.value.length}/500`;
-        });
-
-        // 语法高亮函数
-        function highlightCode(text) {
-            // 简单的代码高亮规则
-            return text
-                .replace(/\b(function|return|if|else|for|while|switch|case|break|continue|var|let|const)\b/g, '<span class="hl-keyword">$&</span>')
-                .replace(/(".*?"|'.*?')/g, '<span class="hl-string">$&</span>')
-                .replace(/\b\d+\b/g, '<span class="hl-number">$&</span>')
-                .replace(/\/\/.*$/gm, '<span class="hl-comment">$&</span>');
-        }
-
-        // 复制到剪贴板
-        function addCopyButton() {
-            const resultDiv = document.getElementById('result');
-            if (!resultDiv.querySelector('.copy-btn')) {
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-btn';
-                copyBtn.textContent = '复制';
-                copyBtn.onclick = () => {
-                    try {
-                        const text = resultDiv.innerText;
-                        const textarea = document.createElement('textarea');
-                        textarea.value = text;
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                        alert('已复制到剪贴板');
-                    } catch (err) {
-                        alert('复制失败');
-                    }
-                };
-                resultDiv.appendChild(copyBtn);
-            }
-        }
 
         speechInputIcon.addEventListener('click', function () {
             if ('webkitSpeechRecognition' in window) {
@@ -264,10 +192,7 @@
                 body: JSON.stringify({ prompt: prompt })
             });
             const data = await response.json();
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = highlightCode(data.result);
-            addCopyButton();
-            resultDiv.scrollTop = resultDiv.scrollHeight; // 自动滚动到底部
+            document.getElementById('result').innerText = data.result;
         });
     </script>
 </body>
