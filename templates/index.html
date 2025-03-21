@@ -93,6 +93,26 @@
             font-family: 'Consolas', monospace;
             overflow-x: auto;
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         .input-group img {
@@ -158,7 +178,10 @@
             <button id="callOllamaButton">发送</button>
             <button onclick="window.location.href='/new_page'">转到deepseek调用</button>
         </div>
-        <p id="result"></p>
+        <div id="result">
+            <div class="loader" id="loader"></div>
+            <pre id="resultText" style="margin: 0;"></pre>
+        </div>
     </div>
 
     <script>
@@ -183,16 +206,31 @@
         });
 
         callOllamaButton.addEventListener('click', async function () {
-            const prompt = promptInput.value;
-            const response = await fetch('/call_ollama', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ prompt: prompt })
-            });
-            const data = await response.json();
-            document.getElementById('result').innerText = data.result;
+            try {
+                const prompt = promptInput.value;
+                const loader = document.getElementById('loader');
+                const resultText = document.getElementById('resultText');
+                
+                // 显示加载动画
+                loader.style.display = 'block';
+                resultText.innerText = '';
+                
+                const response = await fetch('/call_ollama', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                const data = await response.json();
+                
+                // 隐藏加载动画并显示结果
+                loader.style.display = 'none';
+                resultText.innerText = data.result;
+            } catch (error) {
+                loader.style.display = 'none';
+                resultText.innerText = "请求出错：\n" + error.message;
+            }
         });
     </script>
 </body>
