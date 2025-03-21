@@ -73,6 +73,26 @@
             white-space: pre-wrap;
             font-family: 'Consolas', monospace;
             text-align: left;
+            position: relative;
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
         #result {
@@ -104,6 +124,7 @@
         <button id="runScript4Button">生成PlantUML</button>
         <button onclick="window.location.href='/'">返回首页</button>
         <div id="output" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: left; white-space: pre-wrap;">
+            <div class="loader" id="loader"></div>
             <pre id="result" style="margin: 0;"></pre>
         </div>
     </div>
@@ -115,6 +136,11 @@
 
         async function runScript(endpoint) {
             try {
+                // 显示加载动画
+                const loader = document.getElementById('loader');
+                loader.style.display = 'block';
+                resultText.innerText = '';
+                
                 const response = await fetch(endpoint, {
                     method: 'POST'
                 });
@@ -126,12 +152,16 @@
                 if (data.error) {
                     output += "\n错误信息: " + data.error;
                 }
+                // 隐藏加载动画
+                loader.style.display = 'none';
+                
                 if (output) {
                     resultText.innerText = output;
                 } else {
                     resultText.innerText = "脚本执行成功，但无输出内容";
                 }
             } catch (error) {
+                loader.style.display = 'none';
                 resultText.innerText = "脚本执行出错：\n" + error.message;
             }
         }
