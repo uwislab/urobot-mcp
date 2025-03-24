@@ -14,9 +14,7 @@ def call_ollama():
     try:
         data = request.get_json()
         prompt = data['prompt']
-        model = data.get('model', 'llama3:8b')  # 默认使用llama3模型，可根据需求更改
-
-        # 这里假设ollama.chat函数能正常工作，实际可能需要根据ollama库的正确用法调整
+        model = data.get('model', 'llama3:8b')  # 使用llama3:8b模型
         response = ollama.chat(model=model, messages=[{"role": "user", "content": prompt}])
         return jsonify({"result": response["message"]["content"]})
     except Exception as e:
