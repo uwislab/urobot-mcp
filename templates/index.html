@@ -2,61 +2,67 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>调用Ollama</title>
+    <!-- 页面基础设置 -->
+    <meta charset="UTF-8">  <!-- 字符编码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局 -->
+    <title>调用Ollama - 首页</title>  <!-- 页面标题 -->
     <style>
+        /* 页面整体样式 */
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-image: url('static/background.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            font-family: 'Segoe UI', system-ui, sans-serif;  /* 使用系统字体 */
+            background-image: url('static/background.png');  /* 背景图片 */
+            background-size: cover;  /* 背景图片覆盖整个页面 */
+            background-position: center;  /* 背景图片居中 */
+            background-attachment: fixed;  /* 背景图片固定 */
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            justify-content: center;  /* 水平居中 */
+            align-items: center;  /* 垂直居中 */
+            min-height: 100vh;  /* 最小高度为视口高度 */
             margin: 0;
-            padding: 20px;
+            padding: 20px;  /* 内边距 */
         }
 
+        /* 内容容器样式 */
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 800px;
-            width: 100%;
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
+            padding: 2rem;  /* 内边距 */
+            border-radius: 15px;  /* 圆角 */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);  /* 阴影效果 */
+            max-width: 800px;  /* 最大宽度 */
+            width: 100%;  /* 宽度100% */
+            backdrop-filter: blur(10px);  /* 背景模糊效果 */
         }
 
+        /* 标题样式 */
         h1 {
-            color: #2a5298;
-            text-align: center;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            color: #2a5298;  /* 主色调 */
+            text-align: center;  /* 居中 */
+            margin-bottom: 1.5rem;  /* 下边距 */
+            font-weight: 600;  /* 字体粗细 */
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);  /* 文字阴影 */
         }
 
+        /* 输入框组样式 */
         .input-group {
             display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 1.5rem;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            align-items: center;  /* 垂直居中 */
+            gap: 15px;  /* 元素间距 */
+            margin-bottom: 1.5rem;  /* 下边距 */
+            background: rgba(255, 255, 255, 0.9);  /* 半透明白色背景 */
+            padding: 15px;  /* 内边距 */
+            border-radius: 12px;  /* 圆角 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* 阴影效果 */
         }
 
+        /* 文本输入框样式 */
         input[type="text"] {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            flex: 1;  /* 自动填充剩余空间 */
+            padding: 12px 15px;  /* 内边距 */
+            border: 2px solid #e0e0e0;  /* 边框 */
+            border-radius: 8px;  /* 圆角 */
+            font-size: 1rem;  /* 字体大小 */
+            transition: all 0.3s ease;  /* 过渡效果 */
+            background: rgba(255, 255, 255, 0.9);  /* 背景颜色 */
         }
 
         input[type="text"]:focus {
@@ -82,32 +88,34 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* 结果展示区域样式 */
         #result {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            min-height: 150px;
-            white-space: pre-wrap;
-            font-family: 'Consolas', monospace;
-            overflow-x: auto;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            position: relative;
+            margin-top: 1.5rem;  /* 上边距 */
+            padding: 1.5rem;  /* 内边距 */
+            background: rgba(255, 255, 255, 0.9);  /* 背景颜色 */
+            border-radius: 12px;  /* 圆角 */
+            border: 1px solid rgba(0, 0, 0, 0.1);  /* 边框 */
+            min-height: 150px;  /* 最小高度 */
+            white-space: pre-wrap;  /* 保留空白和换行 */
+            font-family: 'Consolas', monospace;  /* 等宽字体 */
+            overflow-x: auto;  /* 水平滚动 */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);  /* 内阴影 */
+            position: relative;  /* 相对定位 */
         }
 
+        /* 加载动画样式 */
         .loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #2a5298;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            display: none;
+            position: absolute;  /* 绝对定位 */
+            top: 50%;  /* 垂直居中 */
+            left: 50%;  /* 水平居中 */
+            transform: translate(-50%, -50%);  /* 精确居中 */
+            border: 4px solid #f3f3f3;  /* 边框 */
+            border-top: 4px solid #2a5298;  /* 顶部边框颜色 */
+            border-radius: 50%;  /* 圆形 */
+            width: 30px;  /* 宽度 */
+            height: 30px;  /* 高度 */
+            animation: spin 1s linear infinite;  /* 旋转动画 */
+            display: none;  /* 默认隐藏 */
         }
 
         @keyframes spin {
@@ -145,24 +153,25 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
+        /* 移动端响应式样式 */
         @media (max-width: 600px) {
             .container {
-                padding: 1rem;
+                padding: 1rem;  /* 减少内边距 */
             }
             
             .input-group {
-                flex-direction: column;
-                gap: 10px;
-                padding: 1rem;
+                flex-direction: column;  /* 垂直排列 */
+                gap: 10px;  /* 减少间距 */
+                padding: 1rem;  /* 调整内边距 */
             }
             
             button {
-                width: 100%;
-                margin: 5px 0;
+                width: 100%;  /* 全宽按钮 */
+                margin: 5px 0;  /* 调整边距 */
             }
             
             .input-group img {
-                width: 80px;
+                width: 80px;  /* 调整图片大小 */
                 height: 80px;
             }
         }
@@ -185,26 +194,29 @@
     </div>
 
     <script>
+        // 获取DOM元素
         const promptInput = document.getElementById('promptInput');
         const callOllamaButton = document.getElementById('callOllamaButton');
         const speechInputIcon = document.getElementById('speechInputIcon');
 
+        // 语音输入功能
         speechInputIcon.addEventListener('click', function () {
             if ('webkitSpeechRecognition' in window) {
                 const recognition = new webkitSpeechRecognition();
-                recognition.lang = 'zh-CN';
+                recognition.lang = 'zh-CN';  // 设置语言为中文
                 recognition.onresult = function (event) {
                     const transcript = event.results[0][0].transcript;
                     // 去除句号并追加到现有内容
                     const cleanText = transcript.replace(/。/g, '');
                     promptInput.value = (promptInput.value + ' ' + cleanText).trim();
                 };
-                recognition.start();
+                recognition.start();  // 开始语音识别
             } else {
                 alert('你的浏览器不支持语音识别功能。');
             }
         });
 
+        // 调用Ollama API
         callOllamaButton.addEventListener('click', async function () {
             try {
                 const prompt = promptInput.value;
@@ -213,8 +225,9 @@
                 
                 // 显示加载动画
                 loader.style.display = 'block';
-                resultText.innerText = '';
+                resultText.innerText = '';  // 清空结果
                 
+                // 发送POST请求
                 const response = await fetch('/call_ollama', {
                     method: 'POST',
                     headers: {
@@ -222,12 +235,13 @@
                     },
                     body: JSON.stringify({ prompt: prompt })
                 });
-                const data = await response.json();
+                const data = await response.json();  // 解析响应
                 
                 // 隐藏加载动画并显示结果
                 loader.style.display = 'none';
                 resultText.innerText = data.result;
             } catch (error) {
+                // 处理异常
                 loader.style.display = 'none';
                 resultText.innerText = "请求出错：\n" + error.message;
             }
