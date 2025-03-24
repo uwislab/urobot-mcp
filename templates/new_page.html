@@ -2,33 +2,36 @@
 <html lang="en">
 
 <head>
+    <!-- 页面基础设置 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新页面</title>
+    <title>新页面 - Deepseek 功能页面</title>
     <style>
+        /* 页面整体样式 */
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-image: url('../static/deepseek_logo.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            font-family: 'Segoe UI', system-ui, sans-serif;  /* 使用系统字体 */
+            background-image: url('../static/deepseek_logo.png');  /* 背景图片 */
+            background-size: cover;  /* 背景图片覆盖整个页面 */
+            background-position: center;  /* 背景图片居中 */
+            background-attachment: fixed;  /* 背景图片固定 */
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            justify-content: center;  /* 水平居中 */
+            align-items: center;  /* 垂直居中 */
+            min-height: 100vh;  /* 最小高度为视口高度 */
             margin: 0;
-            padding: 20px;
+            padding: 20px;  /* 内边距 */
         }
 
+        /* 内容容器样式 */
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 800px;
-            width: 100%;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.95);  /* 半透明白色背景 */
+            padding: 2rem;  /* 内边距 */
+            border-radius: 15px;  /* 圆角 */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);  /* 阴影效果 */
+            max-width: 800px;  /* 最大宽度 */
+            width: 100%;  /* 宽度100% */
+            backdrop-filter: blur(10px);  /* 背景模糊效果 */
+            border: 1px solid rgba(255, 255, 255, 0.3);  /* 半透明边框 */
         }
 
         h2 {
@@ -64,19 +67,20 @@
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
+        /* 输出区域样式 */
         #output {
-            margin-top: 1.5rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-            min-height: 200px;
-            max-height: 500px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            font-family: 'Consolas', monospace;
-            text-align: left;
-            position: relative;
+            margin-top: 1.5rem;  /* 上边距 */
+            padding: 1.5rem;  /* 内边距 */
+            background: #f8f9fa;  /* 浅灰色背景 */
+            border-radius: 8px;  /* 圆角 */
+            border: 1px solid #e0e0e0;  /* 边框 */
+            min-height: 200px;  /* 最小高度 */
+            max-height: 500px;  /* 最大高度 */
+            overflow-y: auto;  /* 垂直滚动 */
+            white-space: pre-wrap;  /* 保留空白和换行 */
+            font-family: 'Consolas', monospace;  /* 等宽字体 */
+            text-align: left;  /* 左对齐 */
+            position: relative;  /* 相对定位 */
         }
 
         .loader {
@@ -133,37 +137,45 @@
     </div>
 
     <script>
+        // 获取DOM元素
         const runScript3Button = document.getElementById('runScript3Button');
         const runScript4Button = document.getElementById('runScript4Button');
         const resultText = document.getElementById('result');
 
+        // 运行脚本的通用函数
         async function runScript(endpoint) {
             try {
                 // 显示加载动画
                 const loader = document.getElementById('loader');
                 loader.style.display = 'block';
-                resultText.innerText = '';
+                resultText.innerText = '';  // 清空结果
                 
+                // 发送POST请求
                 const response = await fetch(endpoint, {
                     method: 'POST'
                 });
-                const data = await response.json();
+                const data = await response.json();  // 解析响应
+                
+                // 处理响应数据
                 let output = "";
                 if (data.message) {
-                    output += data.message;
+                    output += data.message;  // 添加成功信息
                 }
                 if (data.error) {
-                    output += "\n错误信息: " + data.error;
+                    output += "\n错误信息: " + data.error;  // 添加错误信息
                 }
+                
                 // 隐藏加载动画
                 loader.style.display = 'none';
                 
+                // 显示结果
                 if (output) {
                     resultText.innerText = output;
                 } else {
                     resultText.innerText = "脚本执行成功，但无输出内容";
                 }
             } catch (error) {
+                // 处理异常
                 loader.style.display = 'none';
                 resultText.innerText = "脚本执行出错：\n" + error.message;
             }
