@@ -73,45 +73,6 @@ def run_script3():
             'message': ''
         }), 500
 
-@app.route('/run_script1', methods=['POST'])
-def run_script1():
-    """
-    处理C代码生成请求(通过Ollama)
-    Returns:
-        JSON: 包含生成结果或错误信息
-    """
-    try:
-        from script1 import generate_c_code
-        result = generate_c_code()
-        return jsonify({
-            'message': result,
-            'error': ''
-        })
-    except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'message': ''
-        }), 500
-
-@app.route('/run_script2', methods=['POST'])
-def run_script2():
-    """
-    处理PlantUML生成请求(通过Ollama)
-    Returns:
-        JSON: 包含生成结果或错误信息
-    """
-    try:
-        from script2 import generate_plantuml
-        result = generate_plantuml()
-        return jsonify({
-            'message': result,
-            'error': ''
-        })
-    except Exception as e:
-        return jsonify({
-            'error': str(e),
-            'message': ''
-        }), 500
 
 # 主程序入口
 if __name__ == '__main__':

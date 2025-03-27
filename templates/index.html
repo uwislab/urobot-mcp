@@ -186,8 +186,6 @@
             <img id="speechInputIcon" src="static/microphone.png" alt="语音输入">
             <button id="callOllamaButton">发送</button>
             <button onclick="window.location.href='/new_page'">转到deepseek调用</button>
-            <button id="runScript1Button">生成C代码(Ollama)</button>
-            <button id="runScript2Button">生成PlantUML(Ollama)</button>
         </div>
         <div id="result">
             <div class="loader" id="loader"></div>
@@ -218,54 +216,6 @@
             }
         });
 
-        // 新增按钮事件处理
-        document.getElementById('runScript1Button').addEventListener('click', async function() {
-            try {
-                const loader = document.getElementById('loader');
-                const resultText = document.getElementById('resultText');
-                
-                loader.style.display = 'block';
-                resultText.innerText = '';
-                
-                const response = await fetch('/run_script1', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const data = await response.json();
-                
-                loader.style.display = 'none';
-                resultText.innerText = data.message || data.error;
-            } catch (error) {
-                loader.style.display = 'none';
-                resultText.innerText = "执行出错: " + error.message;
-            }
-        });
-
-        document.getElementById('runScript2Button').addEventListener('click', async function() {
-            try {
-                const loader = document.getElementById('loader');
-                const resultText = document.getElementById('resultText');
-                
-                loader.style.display = 'block';
-                resultText.innerText = '';
-                
-                const response = await fetch('/run_script2', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                const data = await response.json();
-                
-                loader.style.display = 'none';
-                resultText.innerText = data.message || data.error;
-            } catch (error) {
-                loader.style.display = 'none';
-                resultText.innerText = "执行出错: " + error.message;
-            }
-        });
 
         // 调用Ollama API
         callOllamaButton.addEventListener('click', async function () {
