@@ -81,11 +81,11 @@ def run_script1():
         JSON: 包含生成结果或错误信息
     """
     try:
-        # 直接执行script1.py
-        result = subprocess.run(['python', 'script1.py'], capture_output=True, text=True)
+        from script1 import generate_c_code
+        result = generate_c_code()
         return jsonify({
-            'message': result.stdout,
-            'error': result.stderr
+            'message': result,
+            'error': ''
         })
     except Exception as e:
         return jsonify({
@@ -101,11 +101,11 @@ def run_script2():
         JSON: 包含生成结果或错误信息
     """
     try:
-        # 直接执行script2.py
-        result = subprocess.run(['python', 'script2.py'], capture_output=True, text=True)
+        from script2 import generate_plantuml
+        result = generate_plantuml()
         return jsonify({
-            'message': result.stdout,
-            'error': result.stderr
+            'message': result,
+            'error': ''
         })
     except Exception as e:
         return jsonify({
