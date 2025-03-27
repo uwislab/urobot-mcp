@@ -76,9 +76,8 @@ def run_script3():
 @app.route('/run_script4', methods=['POST'])
 def run_script4():
     """
-    处理PlantUML代码生成请求
-    Returns:
-        JSON: 包含生成结果或错误信息
+      处理PlantUML代码生成请求
+       Returns:JSON: 包含生成结果或错误信息
     """
     try:
         # 动态导入script4模块
