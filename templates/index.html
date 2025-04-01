@@ -186,10 +186,18 @@
             <img id="speechInputIcon" src="static/microphone.png" alt="语音输入">
             <button id="callOllamaButton">发送</button>
             <button onclick="window.location.href='/new_page'">转到deepseek调用</button>
+            <button id="showHistoryButton">历史记录</button>
         </div>
         <div id="result">
             <div class="loader" id="loader"></div>
             <pre id="resultText" style="margin: 0;"></pre>
+        </div>
+        
+        <!-- 历史记录面板 -->
+        <div id="historyPanel" style="display: none; margin-top: 20px;">
+            <h3>历史记录</h3>
+            <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
+            <button id="clearHistoryButton" style="margin-top: 10px;">清空历史</button>
         </div>
     </div>
 
@@ -217,6 +225,62 @@
         });
 
 
+        // 存储历史记录到localStorage
+        function saveToHistory(prompt, response) {
+            let history = JSON.parse(localStorage.getItem('ollamaHistory') || [];
+            history.unshift({
+                timestamp: new Date().toLocaleString(),
+                prompt: prompt,
+                response: response
+            });
+            // 最多保存50条记录
+            if (history.length > 50) {
+                history = history.slice(0, 50);
+            }
+            localStorage.setItem('ollamaHistory', JSON.stringify(history));
+        }
+
+        // 显示历史记录
+        function showHistory() {
+            const history = JSON.parse(localStorage.getItem('ollamaHistory')) || [];
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            history.forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.style.padding = '10px';
+                historyItem.style.borderBottom = '1px solid #eee';
+                historyItem.innerHTML = `
+                    <div><strong>时间:</strong> ${item.timestamp}</div>
+                    <div><strong>提问:</strong> ${item.prompt}</div>
+                    <div><strong>回答:</strong> ${item.response}</div>
+                `;
+                historyItem.addEventListener('click', () => {
+                    promptInput.value = item.prompt;
+                    document.getElementById('resultText').innerText = item.response;
+                });
+                historyList.appendChild(historyItem);
+            });
+            
+            document.getElementById('historyPanel').style.display = 'block';
+        }
+
+        // 清空历史记录
+        document.getElementById('clearHistoryButton').addEventListener('click', () => {
+            localStorage.removeItem('ollamaHistory');
+            document.getElementById('historyList').innerHTML = '';
+        });
+
+        // 切换历史记录面板显示
+        document.getElementById('showHistoryButton').addEventListener('click', () => {
+            const panel = document.getElementById('historyPanel');
+            if (panel.style.display === 'none') {
+                showHistory();
+            } else {
+                panel.style.display = 'none';
+            }
+        });
+
         // 调用Ollama API
         callOllamaButton.addEventListener('click', async function () {
             try {
@@ -241,6 +305,8 @@
                 // 隐藏加载动画并显示结果
                 loader.style.display = 'none';
                 resultText.innerText = data.result;
+                // 保存到历史记录
+                saveToHistory(prompt, data.result);
             } catch (error) {
                 // 处理异常
                 loader.style.display = 'none';
