@@ -227,7 +227,7 @@
 
         // 存储历史记录到localStorage
         function saveToHistory(prompt, response) {
-            let history = JSON.parse(localStorage.getItem('ollamaHistory') || [];
+            let history = JSON.parse(localStorage.getItem('ollamaHistory') || '[]');
             history.unshift({
                 timestamp: new Date().toLocaleString(),
                 prompt: prompt,
