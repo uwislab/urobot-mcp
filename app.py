@@ -73,7 +73,28 @@ def run_script3():
             'message': ''
         }), 500
 
-
+@app.route('/run_script4', methods=['POST'])
+def run_script4():
+    """
+    处理printUMluml生成请求
+    Returns:
+        JSON: 包含生成结果或错误信息
+    """
+    try:
+        # 动态导入script4模块
+        from script4 import generate_plantuml
+        # 调用生成函数
+        output = generate_plantuml()
+        return jsonify({
+            'message': output,
+            'error': ''
+        })
+    except Exception as e:
+        # 处理异常情况
+        return jsonify({
+            'error': str(e),
+            'message': ''
+        }), 500
 # 主程序入口
 if __name__ == '__main__':
     # 启动Flask开发服务器
