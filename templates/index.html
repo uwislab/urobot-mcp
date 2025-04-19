@@ -311,6 +311,62 @@
             }
         });
 
+        // 调用script3.py (生成C代码)
+        document.getElementById('runScript1').addEventListener('click', async function() {
+            try {
+                const prompt = "正在生成C代码...";
+                const loader = document.getElementById('loader');
+                const resultText = document.getElementById('resultText');
+                
+                loader.style.display = 'block';
+                resultText.innerText = prompt;
+                
+                const response = await fetch('/run_script3', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                loader.style.display = 'none';
+                resultText.innerText = data.result || data.error;
+                // 保存到历史记录
+                saveToHistory("生成C代码", data.result || data.error);
+            } catch (error) {
+                loader.style.display = 'none';
+                resultText.innerText = "请求出错：\n" + error.message;
+            }
+        });
+
+        // 调用script4.py (生成PlantUML)
+        document.getElementById('runScript2').addEventListener('click', async function() {
+            try {
+                const prompt = "正在生成PlantUML代码...";
+                const loader = document.getElementById('loader');
+                const resultText = document.getElementById('resultText');
+                
+                loader.style.display = 'block';
+                resultText.innerText = prompt;
+                
+                const response = await fetch('/run_script4', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                loader.style.display = 'none';
+                resultText.innerText = data.result || data.error;
+                // 保存到历史记录
+                saveToHistory("生成PlantUML代码", data.result || data.error);
+            } catch (error) {
+                loader.style.display = 'none';
+                resultText.innerText = "请求出错：\n" + error.message;
+            }
+        });
+
         // 调用Ollama API
         callOllamaButton.addEventListener('click', async function () {
             try {
