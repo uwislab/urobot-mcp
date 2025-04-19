@@ -63,14 +63,14 @@ def run_script3():
         # 调用生成函数
         output = generate_c_code()
         return jsonify({
-            'message': output,
+            'result': output,  # 改为result以保持与前端一致
             'error': ''
         })
     except Exception as e:
         # 处理异常情况
         return jsonify({
             'error': str(e),
-            'message': ''
+            'result': ''
         }), 500
 
 @app.route('/run_script4', methods=['POST'])
@@ -86,14 +86,14 @@ def run_script4():
         # 调用生成函数
         output = generate_plantuml()
         return jsonify({
-            'message': output,
+            'result': output,  # 改为result以保持与前端一致
             'error': ''
         })
     except Exception as e:
         # 处理异常情况
         return jsonify({
             'error': str(e),
-            'message': ''
+            'result': ''
         }), 500
 # 主程序入口
 if __name__ == '__main__':
