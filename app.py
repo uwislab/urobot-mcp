@@ -98,10 +98,14 @@ def run_script3():
         JSON: 包含生成结果或错误信息
     """
     try:
+        # 获取用户输入
+        data = request.get_json()
+        user_prompt = data.get('prompt', '')
+        
         # 动态导入script3模块
         from script3 import gen_c_code
-        # 调用生成函数
-        output = gen_c_code()
+        # 调用生成函数并传入用户提示
+        output = gen_c_code(user_prompt)
         return jsonify({
             'result': output,  # 改为result以保持与前端一致
             'error': ''

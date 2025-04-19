@@ -5,7 +5,7 @@ import os
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-def gen_c_code():
+def gen_c_code(user_prompt=None):
     """
     生成C语言代码的主函数
     通过Deepseek API生成朴素贝叶斯算法的C语言实现代码
@@ -23,7 +23,8 @@ def gen_c_code():
     # 构造生成C代码的提示词
     prompt = ("你是一个能生成 C 语言程序的智能助手。"
              "请根据以下需求生成 C 语言代码："
-             "实现一个朴素贝叶斯算法，并将生成的代码保存到本地文件。")
+             f"{user_prompt if user_prompt else '实现一个朴素贝叶斯算法'}"
+             "并将生成的代码保存到本地文件。")
     
     # 构造API请求数据
     data = {
