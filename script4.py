@@ -5,7 +5,7 @@ import os
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-def generate_plantuml():
+def gen_plantuml():
     """
     生成PlantUML代码的主函数
     通过Deepseek API生成学生管理系统的PlantUML代码
@@ -66,5 +66,5 @@ def generate_plantuml():
         return f"生成PlantUML代码时出错: {str(e)}"
 
 if __name__ == "__main__":
-    result = generate_plantuml()
+    result = gen_plantuml()
     print(result)
