@@ -157,15 +157,21 @@
                 const data = await response.json();  // 解析响应
                 
                 // 处理响应数据
+                console.log("API响应数据:", data);  // 调试日志
                 let output = "";
+                
+                // 检查不同可能的返回字段
                 if (data.result) {
-                    output += data.result;
+                    output = data.result;
                 } else if (data.message) {
-                    output += data.message;
+                    output = data.message;
                 } else if (data.error) {
-                    output += "错误信息: " + data.error;
+                    output = "错误: " + data.error;
+                } else if (data.choices && data.choices[0] && data.choices[0].message) {
+                    // 处理Deepseek API的直接响应
+                    output = data.choices[0].message.content;
                 } else {
-                    output += "脚本返回数据: " + JSON.stringify(data, null, 2);
+                    output = "原始响应数据:\n" + JSON.stringify(data, null, 2);
                 }
                 
                 // 隐藏加载动画
@@ -173,12 +179,20 @@
                 
                 // 显示结果
                 resultText.innerText = output;
-                }
             } catch (error) {
                 // 处理异常
+                console.error("请求出错:", error);  // 调试日志
                 loader.style.display = 'none';
-                resultText.innerText = "请求出错：\n" + error.message + 
-                                      "\n\n完整错误信息:\n" + JSON.stringify(error, null, 2);
+                let errorMsg = `请求出错: ${error.message}\n`;
+                if (error.response) {
+                    errorMsg += `状态码: ${error.response.status}\n`;
+                    try {
+                        errorMsg += `响应数据: ${JSON.stringify(await error.response.json(), null, 2)}`;
+                    } catch (e) {
+                        errorMsg += `无法解析响应数据: ${e.message}`;
+                    }
+                }
+                resultText.innerText = errorMsg;
             }
         }
 
