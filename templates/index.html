@@ -224,10 +224,10 @@
         </div>
         
         <!-- 历史记录面板 -->
-        <div id="historyPanel" style="display: none; margin-top: 20px;">
+        <div id="historyPanel" style="display: none; margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
             <h3>历史记录</h3>
-            <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
-            <button id="clearHistoryButton" style="margin-top: 10px; background: #dc3545;">清空历史</button>
+            <div id="historyList"></div>
+            <button id="clearHistoryButton" style="margin-top: 10px;">清空历史</button>
         </div>
     </div>
 
@@ -286,28 +286,18 @@
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '';
             
-            if (history.length === 0) {
-                historyList.innerHTML = '<div style="padding: 10px; color: #666;">无历史记录</div>';
-                return;
-            }
-            
-            history.forEach((item, index) => {
+            history.forEach(item => {
                 const historyItem = document.createElement('div');
                 historyItem.style.padding = '10px';
                 historyItem.style.borderBottom = '1px solid #eee';
-                historyItem.style.cursor = 'pointer';
                 historyItem.innerHTML = `
-                    <div><strong>${new Date(item.timestamp).toLocaleString()}</strong></div>
+                    <div><strong>时间:</strong> ${item.timestamp}</div>
                     <div><strong>提问:</strong> ${item.prompt}</div>
-                    <div><strong>回答:</strong> ${item.response.substring(0, 100)}...</div>
-                    <button onclick="event.stopPropagation(); showHistoryDetail(${index})" 
-                        style="margin-top: 5px; padding: 2px 5px; font-size: 12px;">查看详情</button>
+                    <div><strong>回答:</strong> ${item.response}</div>
                 `;
-                historyItem.addEventListener('click', (e) => {
-                    if (e.target.tagName !== 'BUTTON') {
-                        promptInput.value = item.prompt;
-                        document.getElementById('resultText').innerText = item.response;
-                    }
+                historyItem.addEventListener('click', () => {
+                    promptInput.value = item.prompt;
+                    document.getElementById('resultText').innerText = item.response;
                 });
                 historyList.appendChild(historyItem);
             });
@@ -322,12 +312,10 @@
         });
 
         // 切换历史记录面板显示
-        document.getElementById('showHistoryButton').addEventListener('click', (e) => {
-            e.stopPropagation();
+        document.getElementById('showHistoryButton').addEventListener('click', () => {
             const panel = document.getElementById('historyPanel');
             if (panel.style.display === 'none') {
                 showHistory();
-                panel.style.display = 'block';
             } else {
                 panel.style.display = 'none';
             }
