@@ -99,9 +99,9 @@ def run_script3():
     """
     try:
         # 动态导入script3模块
-        from script3 import generate_c_code
+        from script3 import gen_c_code
         # 调用生成函数
-        output = generate_c_code()
+        output = gen_c_code()
         return jsonify({
             'result': output,  # 改为result以保持与前端一致
             'error': ''
@@ -122,9 +122,9 @@ def run_script4():
     """
     try:
         # 动态导入script4模块
-        from script4 import generate_plantuml
+        from script4 import gen_plantuml
         # 调用生成函数
-        output = generate_plantuml()
+        output = gen_plantuml()
         return jsonify({
             'result': output,  # 改为result以保持与前端一致
             'error': ''

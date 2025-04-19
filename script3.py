@@ -5,7 +5,7 @@ import os
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-def generate_c_code():
+def gen_c_code():
     """
     生成C语言代码的主函数
     通过Deepseek API生成朴素贝叶斯算法的C语言实现代码
@@ -64,5 +64,5 @@ def generate_c_code():
         return f"生成代码时出错: {str(e)}"
 
 if __name__ == "__main__":
-    result = generate_c_code()
+    result = gen_c_code()
     print(result)
