@@ -153,6 +153,32 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
+        /* 脚本按钮样式 */
+        .script-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+        
+        .script-button {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .script-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(135deg, #43A047 0%, #1B5E20 100%);
+        }
+
         /* 移动端响应式样式 */
         @media (max-width: 600px) {
             .container {
@@ -180,6 +206,10 @@
 
 <body>
     <div class="container">
+        <div class="script-buttons">
+            <button id="runScript1" class="script-button">生成C代码</button>
+            <button id="runScript2" class="script-button">生成PlantUML</button>
+        </div>
         <div class="input-group">
             <img src="static/ollama.png" alt="输入框图片">
             <input type="text" id="promptInput" placeholder="请输入提示词">
