@@ -120,15 +120,19 @@ def run_script3():
 @app.route('/run_script4', methods=['POST'])
 def run_script4():
     """
-    处理printUMluml生成请求
+    处理PlantUML生成请求
     Returns:
         JSON: 包含生成结果或错误信息
     """
     try:
+        # 获取用户输入
+        data = request.get_json()
+        user_prompt = data.get('prompt', '')
+        
         # 动态导入script4模块
         from script4 import gen_plantuml
-        # 调用生成函数
-        output = gen_plantuml()
+        # 调用生成函数并传入用户提示
+        output = gen_plantuml(user_prompt)
         return jsonify({
             'result': output,  # 改为result以保持与前端一致
             'error': ''

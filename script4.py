@@ -5,11 +5,14 @@ import os
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-def gen_plantuml():
+def gen_plantuml(user_prompt=None):
     """
     生成PlantUML代码的主函数
-    通过Deepseek API生成学生管理系统的PlantUML代码
+    通过Deepseek API生成PlantUML代码
     并将生成的代码保存到本地文件
+    
+    Args:
+        user_prompt (str, optional): 用户输入的提示词. Defaults to None.
     
     Returns:
         str: 生成结果信息，包含保存路径和生成的代码内容
@@ -25,7 +28,7 @@ def gen_plantuml():
              "能力：能够根据输入的描述准确生成 PlantUML 代码，并以文本文件形式提供。"
              "知识储备：精通 PlantUML 语法及各类图形绘制规则。"
              "请根据以下描述生成 PlantUML 代码："
-             "生成一个包含学生、教师、课程、班级、选课记录、成绩、考勤等七个对象的学生管理系统的PlantUML代码")
+             f"{user_prompt if user_prompt else '生成一个包含学生、教师、课程、班级、选课记录、成绩、考勤等七个对象的学生管理系统的PlantUML代码'}")
     
     # 构造API请求数据
     data = {
