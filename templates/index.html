@@ -227,7 +227,7 @@
         <div id="historyPanel" style="display: none; margin-top: 20px;">
             <h3>历史记录</h3>
             <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
-            <button id="clearHistoryButton" style="margin-top: 10px;">清空历史</button>
+            <button id="clearHistoryButton" style="margin-top: 10px; background: #dc3545;">清空历史</button>
         </div>
     </div>
 
@@ -270,20 +270,31 @@
             localStorage.setItem('ollamaHistory', JSON.stringify(history));
         }
 
+        // 显示历史详情
+        function showHistoryDetail(index) {
+            const history = JSON.parse(localStorage.getItem('ollamaHistory')) || [];
+            const item = history[index];
+            if (item) {
+                document.getElementById('resultText').innerText = 
+                    `[${new Date(item.timestamp).toLocaleString()}]\n提问: ${item.prompt}\n\n回答:\n${item.response}`;
+            }
+        }
+
         // 显示历史记录
         function showHistory() {
             const history = JSON.parse(localStorage.getItem('ollamaHistory')) || [];
             const historyList = document.getElementById('historyList');
             historyList.innerHTML = '';
             
-            history.forEach(item => {
+            history.forEach((item, index) => {
                 const historyItem = document.createElement('div');
                 historyItem.style.padding = '10px';
                 historyItem.style.borderBottom = '1px solid #eee';
                 historyItem.innerHTML = `
-                    <div><strong>时间:</strong> ${item.timestamp}</div>
+                    <div><strong>${new Date(item.timestamp).toLocaleString()}</strong></div>
                     <div><strong>提问:</strong> ${item.prompt}</div>
-                    <div><strong>回答:</strong> ${item.response}</div>
+                    <div><strong>回答:</strong> ${item.response.substring(0, 100)}...</div>
+                    <button onclick="showHistoryDetail(${index})" style="margin-top: 5px; padding: 2px 5px; font-size: 12px;">查看详情</button>
                 `;
                 historyItem.addEventListener('click', () => {
                     promptInput.value = item.prompt;

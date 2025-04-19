@@ -130,14 +130,15 @@
         <button id="runScript3Button" onclick="runScript('/run_script3')">生成C代码(Deepseek)</button>
         <button id="runScript4Button" onclick="runScript('/run_script4')">生成PlantUML(Deepseek)</button>
         <button onclick="window.location.href='/'">返回首页</button>
-        <button id="clearHistory" style="background: #dc3545;">清除历史记录</button>
         <div id="output" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: left; white-space: pre-wrap;">
             <div class="loader" id="loader"></div>
             <pre id="result" style="margin: 0;"></pre>
         </div>
-        <div id="history" style="margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px; max-height: 300px; overflow-y: auto;">
+        <!-- 历史记录面板 -->
+        <div id="historyPanel" style="display: none; margin-top: 20px;">
             <h3>历史记录</h3>
-            <div id="historyList"></div>
+            <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
+            <button id="clearHistoryButton" style="margin-top: 10px; background: #dc3545;">清空历史</button>
         </div>
     </div>
 
@@ -184,8 +185,19 @@
             loadHistory();
         }
 
+        // 切换历史记录面板显示
+        document.getElementById('showHistoryButton').addEventListener('click', () => {
+            const panel = document.getElementById('historyPanel');
+            if (panel.style.display === 'none') {
+                loadHistory();
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        });
+
         // 清除历史记录
-        document.getElementById('clearHistory').addEventListener('click', () => {
+        document.getElementById('clearHistoryButton').addEventListener('click', () => {
             localStorage.removeItem(HISTORY_KEY);
             document.getElementById('historyList').innerHTML = '<div>无历史记录</div>';
         });
