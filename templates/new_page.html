@@ -158,26 +158,27 @@
                 
                 // 处理响应数据
                 let output = "";
-                if (data.message) {
-                    output += data.message;  // 添加成功信息
-                }
-                if (data.error) {
-                    output += "\n错误信息: " + data.error;  // 添加错误信息
+                if (data.result) {
+                    output += data.result;
+                } else if (data.message) {
+                    output += data.message;
+                } else if (data.error) {
+                    output += "错误信息: " + data.error;
+                } else {
+                    output += "脚本返回数据: " + JSON.stringify(data, null, 2);
                 }
                 
                 // 隐藏加载动画
                 loader.style.display = 'none';
                 
                 // 显示结果
-                if (output) {
-                    resultText.innerText = output;
-                } else {
-                    resultText.innerText = "脚本执行成功，但无输出内容";
+                resultText.innerText = output;
                 }
             } catch (error) {
                 // 处理异常
                 loader.style.display = 'none';
-                resultText.innerText = "脚本执行出错：\n" + error.message;
+                resultText.innerText = "请求出错：\n" + error.message + 
+                                      "\n\n完整错误信息:\n" + JSON.stringify(error, null, 2);
             }
         }
 
