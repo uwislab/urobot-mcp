@@ -50,6 +50,46 @@ def new_page():
     """
     return render_template('new_page.html')
 
+@app.route('/run_script1', methods=['POST'])
+def run_script1():
+    """
+    处理C代码生成请求(script1)
+    Returns:
+        JSON: 包含生成结果或错误信息
+    """
+    try:
+        from script1 import generate_c_code
+        output = generate_c_code()
+        return jsonify({
+            'result': output,
+            'error': ''
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'result': ''
+        }), 500
+
+@app.route('/run_script2', methods=['POST'])
+def run_script2():
+    """
+    处理PlantUML生成请求(script2)
+    Returns:
+        JSON: 包含生成结果或错误信息
+    """
+    try:
+        from script2 import generate_plantuml
+        output = generate_plantuml()
+        return jsonify({
+            'result': output,
+            'error': ''
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'result': ''
+        }), 500
+
 @app.route('/run_script3', methods=['POST'])
 def run_script3():
     """
