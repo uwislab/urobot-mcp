@@ -1,0 +1,69 @@
+@startuml ProjectArchitecture
+skinparam monochrome true
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+
+title 系统架构图
+
+package "前端" {
+    [Web浏览器] as browser
+    [index.html] as index
+    [deepseek.html] as deepseek
+    [静态资源] as static
+}
+
+package "后端" {
+    [Flask应用] as flask
+    [Ollama集成] as ollama
+    [Deepseek集成] as deepseek_api
+    [脚本执行器] as scripts
+}
+
+package "外部服务" {
+    [Ollama服务] as ollama_service
+    [Deepseek API] as deepseek_service
+}
+
+package "文件系统" {
+    [生成的代码文件] as code_files
+    [PlantUML文件] as plantuml_files
+}
+
+' 前端组件关系
+browser --> index : 访问
+browser --> deepseek : 访问
+index --> static : 加载资源
+deepseek --> static : 加载资源
+
+' 后端处理流程
+browser --> flask : HTTP请求
+flask --> ollama : 调用
+flask --> deepseek_api : 调用
+flask --> scripts : 执行脚本
+
+' 外部服务集成
+ollama --> ollama_service : API调用
+deepseek_api --> deepseek_service : API调用
+
+' 文件系统交互
+scripts --> code_files : 生成/保存
+scripts --> plantuml_files : 生成/保存
+
+' 组件说明
+note right of flask
+  Flask应用负责:
+  - 路由处理
+  - 模板渲染
+  - API端点提供
+end note
+
+note left of scripts
+  脚本执行器包含:
+  - script1.py (Ollama生成C代码)
+  - script2.py (Ollama生成PlantUML)
+  - script3.py (Deepseek生成C代码)
+  - script4.py (Deepseek生成PlantUML)
+end note
+
+@enduml
