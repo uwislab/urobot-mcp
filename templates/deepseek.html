@@ -52,14 +52,19 @@
         button {
             background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
             color: white;
-            padding: 12px 24px;
+            padding: 10px 15px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            min-width: 160px;
+            min-width: 100px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
         }
 
         button:hover {
@@ -128,23 +133,18 @@
     <div class="container">
         <h2>deepseek使用</h2>
         <div class="button-group">
-            <button id="runScript3Button" onclick="runScript('/run_script3')">生成C代码(Deepseek)</button>
-            <button id="runScript4Button" onclick="runScript('/run_script4')">生成PlantUML(Deepseek)</button>
+            <button id="runScript3Button" onclick="runScript('/run_script3')">生成C代码</button>
+            <button id="runScript4Button" onclick="runScript('/run_script4')">生成PlantUML</button>
             <button onclick="window.location.href='/'">返回首页</button>
-            <div style="display: flex; align-items: center; gap: 5px;">
-                <button id="showHistoryButton">历史</button>
-                <button id="voiceInputButton" style="width: 40px; height: 40px; border-radius: 50%; 
-                    background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%); color: white; 
-                    border: none; cursor: pointer; display: flex; align-items: center; 
-                    justify-content: center; padding: 0;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-            </div>
+            <button id="showHistoryButton">历史</button>
+            <button id="voiceInputButton" style="min-width: 40px; width: 40px; padding: 0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+            </button>
         </div>
         
         <div style="margin: 20px 0;">
