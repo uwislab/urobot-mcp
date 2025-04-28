@@ -131,6 +131,22 @@
         <button id="runScript4Button" onclick="runScript('/run_script4')">生成PlantUML(Deepseek)</button>
         <button onclick="window.location.href='/'">返回首页</button>
         <button id="showHistoryButton">历史</button>
+        
+        <div style="margin: 20px 0; position: relative;">
+            <textarea id="promptInput" style="width: 100%; height: 100px; padding: 10px 50px 10px 10px;" 
+                placeholder="请输入你的需求描述..."></textarea>
+            <button id="voiceInputButton" style="position: absolute; right: 10px; top: 10px; 
+                background: #2a5298; color: white; border: none; border-radius: 50%; 
+                width: 30px; height: 30px; cursor: pointer; display: flex; 
+                align-items: center; justify-content: center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+            </button>
+        </div>
         <div id="output" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: left; white-space: pre-wrap;">
             <div class="loader" id="loader"></div>
             <pre id="result" style="margin: 0;"></pre>
@@ -349,26 +365,6 @@
         // 初始化页面时加载历史记录
         loadHistory();
         
-        // 添加输入框
-        const inputContainer = document.createElement('div');
-        inputContainer.innerHTML = `
-            <div style="margin: 20px 0; position: relative;">
-                <textarea id="promptInput" style="width: 100%; height: 100px; padding: 10px 50px 10px 10px;" 
-                    placeholder="请输入你的需求描述..."></textarea>
-                <button id="voiceInputButton" style="position: absolute; right: 10px; top: 10px; 
-                    background: #2a5298; color: white; border: none; border-radius: 50%; 
-                    width: 30px; height: 30px; cursor: pointer; display: flex; 
-                    align-items: center; justify-content: center;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-            </div>
-        `;
-        document.querySelector('.container').insertBefore(inputContainer, document.getElementById('output'));
     </script>
 </body>
 
