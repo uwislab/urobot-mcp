@@ -38,6 +38,12 @@ class Robot:
         self.angle = 0  # 当前角度
         self.command_queue = []
         self.executing = False
+        self.keys_pressed = {
+            'up': False,
+            'down': False,
+            'left': False,
+            'right': False
+        }
         
     def draw(self, screen):
         # 绘制墙壁
@@ -105,9 +111,33 @@ class Robot:
         if not self.active:
             return
             
+        # 计算新位置 - 考虑所有按下的方向键
+        move_x = 0
+        move_y = 0
+        
+        if self.keys_pressed['up']:
+            move_y -= self.speed
+            self.angle = 0
+        if self.keys_pressed['down']:
+            move_y += self.speed
+            self.angle = 180
+        if self.keys_pressed['left']:
+            move_x -= self.speed
+            self.angle = 90
+        if self.keys_pressed['right']:
+            move_x += self.speed
+            self.angle = 270
+            
+        # 对角线移动时保持45度角
+        if move_x != 0 and move_y != 0:
+            if move_y < 0:  # 向上
+                self.angle = 315 if move_x > 0 else 45
+            else:  # 向下
+                self.angle = 225 if move_x < 0 else 135
+                
         # 计算新位置
-        new_x = self.x + self.direction[0] * self.speed
-        new_y = self.y + self.direction[1] * self.speed
+        new_x = self.x + move_x
+        new_y = self.y + move_y
 
         # 检查是否碰撞墙壁
         if new_x < WALL_THICKNESS:
@@ -342,6 +372,25 @@ def main():
                 
         # 检查碰撞
         robot_manager.check_collisions()
+        
+        # 处理键盘控制
+        keys = pygame.key.get_pressed()
+        if len(robot_manager.robots) > 0:
+            robot = robot_manager.robots[0]
+            robot.keys_pressed['up'] = keys[pygame.K_UP]
+            robot.keys_pressed['down'] = keys[pygame.K_DOWN]
+            robot.keys_pressed['left'] = keys[pygame.K_LEFT]
+            robot.keys_pressed['right'] = keys[pygame.K_RIGHT]
+            
+            # 处理移动
+            if robot.keys_pressed['up']:
+                robot.move_up()
+            elif robot.keys_pressed['down']:
+                robot.move_down()
+            if robot.keys_pressed['left']:
+                robot.move_left()
+            elif robot.keys_pressed['right']:
+                robot.move_right()
         
         # 执行队列中的命令
         for robot in robot_manager.robots:
