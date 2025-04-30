@@ -321,7 +321,7 @@ def main():
     # 添加测试动作
     robot = robot_manager.get_robot(robot_id)
     robot.forward(4, 10)
-    robot.turn_right(90)
+    robot.turn_left(90)
     robot.forward(4, 10)
     
     running = True
