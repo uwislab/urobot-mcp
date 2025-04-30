@@ -36,6 +36,8 @@ class Robot:
         self.speed = 4
         self.direction = [0, 0]  # 运动方向 [x, y]
         self.angle = 0  # 当前角度
+        self.command_queue = []
+        self.executing = False
         
     def draw(self, screen):
         # 绘制墙壁
@@ -238,10 +240,16 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         robot = self.robot_manager.get_robot(robot_id)
         self.last_command = c_code  # 保存最后接收到的命令
         
-        # Simple C-like interpreter
+        # Clear previous commands if it's a new program
+        if c_code.startswith('int main()'):
+            robot.command_queue = []
+            
+        # Parse and queue commands
         lines = c_code.split('\n')
         for line in lines:
             line = line.strip()
+            if not line or line.startswith('//') or line.startswith('/*'):
+                continue
             
             # Handle function calls
             if line.startswith('forward('):
@@ -318,11 +326,13 @@ def main():
     robot_id = robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
     robot_manager.add_robot(WIDTH//2 + 100, HEIGHT//2)
     
-    # 添加测试动作
+    # 示例命令 - 可以删除或保留作为演示
     robot = robot_manager.get_robot(robot_id)
-    robot.forward(4, 10)
-    robot.turn_left(90)
-    robot.forward(4, 10)
+    robot.command_queue.extend([
+        ('forward', (4, 10)),
+        ('turn_left', (90,)),
+        ('forward', (4, 10))
+    ])
     
     running = True
     while running:
@@ -332,6 +342,14 @@ def main():
                 
         # 检查碰撞
         robot_manager.check_collisions()
+        
+        # 执行队列中的命令
+        for robot in robot_manager.robots:
+            if robot.command_queue and not robot.executing:
+                cmd, args = robot.command_queue.pop(0)
+                robot.executing = True
+                getattr(robot, cmd)(*args)
+                robot.executing = False
             
         # 绘制场景
         screen.fill(WHITE)
