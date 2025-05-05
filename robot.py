@@ -524,7 +524,7 @@ def main():
         
     pygame.quit()
 
-if __name__ == "__main__":
+def run_server():
     # Create robot manager
     robot_manager = RobotManager()
     
@@ -536,6 +536,10 @@ if __name__ == "__main__":
     http_thread = threading.Thread(target=start_http_server, args=(robot_manager,))
     http_thread.daemon = True
     http_thread.start()
+    return robot_manager
+
+if __name__ == "__main__":
+    robot_manager = run_server()
     
     # 如果有命令行参数，执行命令后退出
     import sys
