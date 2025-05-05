@@ -376,31 +376,52 @@ def execute_terminal_command(robot_manager, command):
     
     try:
         if cmd == "forward":
-            speed = int(parts[-2])
-            distance = int(parts[-1])
-            robot.forward(speed, distance)
+            if len(parts) >= 3:
+                speed = int(parts[-2])
+                distance = int(parts[-1])
+                robot.forward(speed, distance)
+            else:
+                print("格式错误: forward 需要速度和距离参数")
         elif cmd == "back":
-            speed = int(parts[-2])
-            distance = int(parts[-1])
-            robot.back(speed, distance)
+            if len(parts) >= 3:
+                speed = int(parts[-2])
+                distance = int(parts[-1])
+                robot.back(speed, distance)
+            else:
+                print("格式错误: back 需要速度和距离参数")
         elif cmd == "left":
-            degrees = int(parts[-1])
-            robot.turn_left(degrees)
+            if len(parts) >= 2:
+                degrees = int(parts[-1])
+                robot.turn_left(degrees)
+            else:
+                print("格式错误: left 需要角度参数")
         elif cmd == "right":
-            degrees = int(parts[-1])
-            robot.turn_right(degrees)
+            if len(parts) >= 2:
+                degrees = int(parts[-1])
+                robot.turn_right(degrees)
+            else:
+                print("格式错误: right 需要角度参数")
         elif cmd == "beep":
-            freq = int(parts[-2])
-            duration = int(parts[-1])
-            robot.beep(freq, duration)
+            if len(parts) >= 3:
+                freq = int(parts[-2])
+                duration = int(parts[-1])
+                robot.beep(freq, duration)
+            else:
+                print("格式错误: beep 需要频率和时长参数")
         elif cmd == "say":
-            text = " ".join(parts[2:])
-            robot.gpp_say(1, text)
+            if len(parts) >= 3:
+                text = " ".join(parts[2:])
+                robot.gpp_say(1, text)
+            else:
+                print("格式错误: say 需要文本参数")
         elif cmd == "stop":
             robot.speed = 0
         elif cmd == "speed":
-            speed = int(parts[-1])
-            robot.speed = min(8, max(1, speed))
+            if len(parts) >= 2:
+                speed = int(parts[-1])
+                robot.speed = min(8, max(1, speed))
+            else:
+                print("格式错误: speed 需要速度参数")
         else:
             print(f"未知命令: {cmd}")
     except (IndexError, ValueError) as e:
