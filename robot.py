@@ -253,12 +253,35 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         if self.path.startswith('/robot.html'):
             params = self.path.split('?')[1].split('&')
             cmd = None
-            robot_id = None
+            robot_id = 0  # Default to first robot
             for param in params:
                 if param.startswith('cmd='):
                     cmd = param[4:]
                 elif param.startswith('id='):
                     robot_id = int(param[3:])
+            
+            # Handle simple movement commands
+            if cmd in ['forward', 'back', 'left', 'right', 'stop']:
+                try:
+                    robot = self.robot_manager.get_robot(robot_id)
+                    if cmd == 'forward':
+                        robot.forward(4, 1)  # speed 4, distance 1
+                    elif cmd == 'back':
+                        robot.back(4, 1)
+                    elif cmd == 'left':
+                        robot.turn_left(90)
+                    elif cmd == 'right':
+                        robot.turn_right(90)
+                    elif cmd == 'stop':
+                        robot.speed = 0
+                    
+                    self.send_response(200)
+                    self.end_headers()
+                    return
+                except Exception as e:
+                    self.send_response(500)
+                    self.end_headers()
+                    return
             
             if cmd and robot_id is not None:
                 try:
