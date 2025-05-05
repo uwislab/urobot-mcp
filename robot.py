@@ -5,6 +5,7 @@ import socketserver
 import threading
 import base64
 import ctypes
+import argparse
 
 # 初始化pygame
 pygame.init()
@@ -356,7 +357,61 @@ def start_http_server(robot_manager):
         httpd.serve_forever()
 
 # 主循环
+def execute_terminal_command(robot_manager, command):
+    """执行终端命令控制机器人"""
+    if not command:
+        return
+        
+    parts = command.split()
+    cmd = parts[0].lower()
+    robot_id = 0  # 默认控制第一个机器人
+    
+    if len(parts) > 1 and parts[1].isdigit():
+        robot_id = int(parts[1])
+        if robot_id >= len(robot_manager.robots):
+            print(f"错误: 机器人ID {robot_id} 不存在")
+            return
+    
+    robot = robot_manager.get_robot(robot_id)
+    
+    try:
+        if cmd == "forward":
+            speed = int(parts[-2])
+            distance = int(parts[-1])
+            robot.forward(speed, distance)
+        elif cmd == "back":
+            speed = int(parts[-2])
+            distance = int(parts[-1])
+            robot.back(speed, distance)
+        elif cmd == "left":
+            degrees = int(parts[-1])
+            robot.turn_left(degrees)
+        elif cmd == "right":
+            degrees = int(parts[-1])
+            robot.turn_right(degrees)
+        elif cmd == "beep":
+            freq = int(parts[-2])
+            duration = int(parts[-1])
+            robot.beep(freq, duration)
+        elif cmd == "say":
+            text = " ".join(parts[2:])
+            robot.gpp_say(1, text)
+        elif cmd == "stop":
+            robot.speed = 0
+        elif cmd == "speed":
+            speed = int(parts[-1])
+            robot.speed = min(8, max(1, speed))
+        else:
+            print(f"未知命令: {cmd}")
+    except (IndexError, ValueError) as e:
+        print(f"命令格式错误: {e}")
+
 def main():
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='机器人仿真控制')
+    parser.add_argument('--command', '-c', type=str, help='直接执行控制命令')
+    args = parser.parse_args()
+
     clock = pygame.time.Clock()
     robot_manager = RobotManager()
     
@@ -429,10 +484,20 @@ if __name__ == "__main__":
     # Create robot manager
     robot_manager = RobotManager()
     
+    # 添加初始机器人
+    robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
+    robot_manager.add_robot(WIDTH//2 + 100, HEIGHT//2)
+    
     # Start HTTP server in separate thread
     http_thread = threading.Thread(target=start_http_server, args=(robot_manager,))
     http_thread.daemon = True
     http_thread.start()
     
-    # Start main loop
+    # 如果有命令行参数，执行命令后退出
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] in ['-c', '--command']:
+        execute_terminal_command(robot_manager, " ".join(sys.argv[2:]))
+        sys.exit(0)
+    
+    # 否则进入主循环
     main()
