@@ -145,5 +145,5 @@ def run_script4():
         }), 500
 # 主程序入口
 if __name__ == '__main__':
-    # 启动Flask开发服务器
-    app.run(debug=True)
+    # 生产环境配置
+    app.run(debug=False, host='0.0.0.0', port=5000)
