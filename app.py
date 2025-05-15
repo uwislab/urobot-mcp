@@ -48,7 +48,7 @@ def new_page():
     Returns:
         HTML: 渲染后的new_page.html模板
     """
-    return render_template('new_page.html')
+    return render_template('deepseek.html')
 
 @app.route('/run_script1', methods=['POST'])
 def run_script1():
