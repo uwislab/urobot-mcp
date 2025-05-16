@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-# API请求超时设置(秒)
-API_TIMEOUT = 30
 
 def gen_c_code(user_prompt: Optional[str] = None) -> str:
     """
@@ -83,7 +81,7 @@ def gen_c_code(user_prompt: Optional[str] = None) -> str:
             DEEPSEEK_API_URL, 
             json=data, 
             headers=headers,
-            timeout=API_TIMEOUT
+            timeout=None
         )
         logger.info(f"收到API响应，状态码: {response.status_code}")
         response.raise_for_status()  # 检查HTTP错误

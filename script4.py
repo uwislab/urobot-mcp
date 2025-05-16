@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-# API请求超时设置(秒)
-API_TIMEOUT = 30
 
 def gen_plantuml(user_prompt: Optional[str] = None) -> str:
     """
@@ -79,7 +77,7 @@ def gen_plantuml(user_prompt: Optional[str] = None) -> str:
     
     try:
         # 发送API请求
-        response = requests.post(DEEPSEEK_API_URL, json=data, headers=headers)
+        response = requests.post(DEEPSEEK_API_URL, json=data, headers=headers, timeout=None)
         response.raise_for_status()  # 检查HTTP错误
         result = response.json()  # 解析JSON响应
         
