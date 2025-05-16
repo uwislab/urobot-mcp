@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template
 import ollama
 import subprocess
 import logging
+import time
 from typing import Dict, Any, Union, Tuple
 
 # 配置日志
