@@ -1,3 +1,4 @@
+from markupsafe import escape
 from flask import Flask, request, jsonify, render_template
 import ollama
 import subprocess
