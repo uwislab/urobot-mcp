@@ -20,18 +20,14 @@ def generate_c_code(user_prompt: Optional[str] = None) -> str:
     logger.debug(f"生成C代码请求参数 - 用户提示: {user_prompt}")
     """
     生成C语言代码的主函数
-    
     功能说明:
     - 通过Ollama本地模型生成朴素贝叶斯算法的C语言实现代码
     - 自动将生成的代码保存到指定路径
     - 支持自定义用户提示
-    
     参数:
         user_prompt (str, optional): 自定义生成提示，默认为None
-        
     返回:
         str: 生成结果信息，包含保存路径和生成的代码内容
-        
     异常:
         Exception: 生成或保存过程中出现的任何错误
         
