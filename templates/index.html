@@ -308,19 +308,21 @@
         });
 
 
-        // 存储历史记录到localStorage
-        function saveToHistory(prompt, response) {
-            let history = JSON.parse(localStorage.getItem('ollamaHistory') || '[]');
+        // 历史记录功能
+        const HISTORY_KEY = 'ollamaHistory';
+        
+        // 添加历史记录
+        function addHistory(prompt, response, endpoint = 'Ollama') {
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || [];
             history.unshift({
-                timestamp: new Date().toLocaleString(),
-                prompt: prompt,
-                response: response
+                timestamp: new Date().toISOString(),
+                endpoint,
+                prompt,
+                response
             });
-            // 最多保存50条记录
-            if (history.length > 50) {
-                history = history.slice(0, 50);
-            }
-            localStorage.setItem('ollamaHistory', JSON.stringify(history));
+            // 最多保存10条记录
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+            loadHistory();
         }
 
         // 显示历史详情
@@ -333,40 +335,40 @@
             }
         }
 
-        // 显示历史记录
-        function showHistory() {
-            const history = JSON.parse(localStorage.getItem('ollamaHistory')) || [];
+        // 加载历史记录
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
             const historyList = document.getElementById('historyList');
-            historyList.innerHTML = '';
-            
-            history.forEach(item => {
-                const historyItem = document.createElement('div');
-                historyItem.style.padding = '10px';
-                historyItem.style.borderBottom = '1px solid #eee';
-                historyItem.innerHTML = `
-                    <div><strong>时间:</strong> ${item.timestamp}</div>
-                    <div><strong>提问:</strong> ${item.prompt}</div>
-                    <div><strong>回答:</strong> ${item.response.substring(0, 100)}${item.response.length > 100 ? '...' : ''}</div>
+            historyList.innerHTML = history.map((item, index) => `
+                <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 5px;">
+                    <div><strong>${new Date(item.timestamp).toLocaleString()}</strong></div>
+                    <div><strong>请求:</strong> ${item.endpoint}</div>
+                    <div><strong>输入:</strong> ${item.prompt}</div>
+                    <div><strong>结果:</strong> ${item.response.substring(0, 100)}${item.response.length > 100 ? '...' : ''}</div>
                     <div style="margin-top: 5px; display: flex; gap: 5px;">
-                        <button onclick="deleteHistoryItem(${history.indexOf(item)})" style="padding: 2px 5px; font-size: 12px; background: #dc3545; color: white; border: none;">删除</button>
+                        <button onclick="showHistoryDetail(${index})" style="padding: 2px 5px; font-size: 12px;">查看详情</button>
+                        <button onclick="deleteHistoryItem(${index})" style="padding: 2px 5px; font-size: 12px; background: #dc3545; color: white; border: none;">删除</button>
                     </div>
-                `;
-                historyItem.addEventListener('click', () => {
-                    promptInput.value = item.prompt;
-                    document.getElementById('resultText').innerText = item.response;
-                });
-                historyList.appendChild(historyItem);
-            });
-            
-            document.getElementById('historyPanel').style.display = 'block';
+                </div>
+            `).join('');
+        }
+
+        // 显示历史详情
+        function showHistoryDetail(index) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            const item = history[index];
+            if (item) {
+                document.getElementById('resultText').innerText = 
+                    `[${new Date(item.timestamp).toLocaleString()}]\n请求: ${item.endpoint}\n输入: ${item.prompt}\n\n结果:\n${item.response}`;
+            }
         }
 
         // 删除单条历史记录
         function deleteHistoryItem(index) {
-            let history = JSON.parse(localStorage.getItem('ollamaHistory') || [];
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
             history.splice(index, 1);
-            localStorage.setItem('ollamaHistory', JSON.stringify(history));
-            showHistory();
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            loadHistory();
         }
 
         // 清空历史记录
@@ -407,7 +409,7 @@
                 
                 loader.style.display = 'none';
                 resultText.innerText = data.result || data.error;
-                saveToHistory("Ollama生成C代码", data.result || data.error);
+                addHistory("Ollama生成C代码", data.result || data.error, "run_script1");
             } catch (error) {
                 loader.style.display = 'none';
                 resultText.innerText = "请求出错：\n" + error.message;
@@ -434,7 +436,7 @@
                 
                 loader.style.display = 'none';
                 resultText.innerText = data.result || data.error;
-                saveToHistory("Ollama生成PlantUML", data.result || data.error);
+                addHistory("Ollama生成PlantUML", data.result || data.error, "run_script2");
             } catch (error) {
                 loader.style.display = 'none';
                 resultText.innerText = "请求出错：\n" + error.message;
@@ -466,7 +468,7 @@
                 loader.style.display = 'none';
                 resultText.innerText = data.result;
                 // 保存到历史记录
-                saveToHistory(prompt, data.result);
+                addHistory(prompt, data.result, 'Ollama');
             } catch (error) {
                 // 处理异常
                 loader.style.display = 'none';
