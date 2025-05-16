@@ -20,12 +20,33 @@ API_TIMEOUT = 30
 def gen_c_code(user_prompt: Optional[str] = None) -> str:
     """
     生成C语言代码的主函数
-    通过Deepseek API生成朴素贝叶斯算法的C语言实现代码
-    并将生成的代码保存到本地文件
     
-    Returns:
-        str: 生成结果信息，包含保存路径和生成的代码内容
+    详细功能说明:
+    - 通过Deepseek API生成C语言代码实现
+    - 支持自定义用户提示词
+    - 自动将生成的代码保存到指定路径
+    - 提供完整的错误处理和日志记录
+    
+    参数:
+        user_prompt (Optional[str]): 用户自定义的生成提示词，默认为None
+        
+    返回:
+        str: 包含以下信息的字符串:
+            - 代码保存路径
+            - 生成的代码内容
+            或错误信息
+            
+    异常:
+        requests.exceptions.RequestException: API请求失败时抛出
+        IOError: 文件保存失败时抛出
+        Exception: 其他未知错误
+        
+    示例:
+        >>> result = gen_c_code("实现一个快速排序算法")
+        >>> print(result)
     """
+    logger.info("开始C代码生成流程")
+    logger.debug(f"用户提示词: {user_prompt}")
     # 设置API请求头
     headers = {
         "Authorization": f"Bearer {DEEPSEEK_API_KEY}",

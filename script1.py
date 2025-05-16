@@ -11,6 +11,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def generate_c_code(user_prompt: Optional[str] = None) -> str:
+    # 参数验证
+    if user_prompt is not None and not isinstance(user_prompt, str):
+        logger.error(f"无效的用户提示词类型: {type(user_prompt)}")
+        raise ValueError("user_prompt必须是字符串或None")
+        
+    # 记录调试信息
+    logger.debug(f"生成C代码请求参数 - 用户提示: {user_prompt}")
     """
     生成C语言代码的主函数
     

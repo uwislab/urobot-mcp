@@ -41,9 +41,27 @@ def index():
 def call_ollama():
     """
     处理Ollama API调用请求
-    Returns:
-        JSON: 包含AI响应结果或错误信息
+    
+    详细说明:
+    - 接收JSON格式的请求数据
+    - 支持自定义模型选择
+    - 提供完整的错误处理
+    - 记录详细的请求日志
+    
+    请求参数:
+        {
+            "prompt": "用户提示词",
+            "model": "可选模型名称" 
+        }
+        
+    返回:
+        JSON: {
+            "result": "AI生成结果",
+            "error": "错误信息(如果有)"
+        }
     """
+    logger.info("收到Ollama API调用请求")
+    start_time = time.time()
     try:
         # 获取请求数据
         data = request.get_json()
@@ -58,7 +76,12 @@ def call_ollama():
         )
         
         # 返回AI响应内容
-        return jsonify({"result": response["message"]["content"]})
+        execution_time = time.time() - start_time
+        logger.info(f"Ollama请求处理完成，耗时: {execution_time:.2f}秒")
+        return jsonify({
+            "result": response["message"]["content"],
+            "execution_time": execution_time
+        })
     except Exception as e:
         # 处理异常情况
         return jsonify({"error": str(e)}), 500
