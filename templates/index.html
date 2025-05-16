@@ -277,7 +277,7 @@
         </div>
         
         <!-- 历史记录面板 -->
-        <div id="historyPanel" style="display: none; margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+        <div id="historyPanel" style="display: none; margin-top: 20px; padding: 15px; background-color: rgba(255, 255, 255, 0.95); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); border: 1px solid rgba(0, 0, 0, 0.1);">
             <h3>历史记录</h3>
             <div id="historyList"></div>
             <button id="clearHistoryButton" style="margin-top: 10px;">清空历史</button>
@@ -346,7 +346,10 @@
                 historyItem.innerHTML = `
                     <div><strong>时间:</strong> ${item.timestamp}</div>
                     <div><strong>提问:</strong> ${item.prompt}</div>
-                    <div><strong>回答:</strong> ${item.response}</div>
+                    <div><strong>回答:</strong> ${item.response.substring(0, 100)}${item.response.length > 100 ? '...' : ''}</div>
+                    <div style="margin-top: 5px; display: flex; gap: 5px;">
+                        <button onclick="deleteHistoryItem(${history.indexOf(item)})" style="padding: 2px 5px; font-size: 12px; background: #dc3545; color: white; border: none;">删除</button>
+                    </div>
                 `;
                 historyItem.addEventListener('click', () => {
                     promptInput.value = item.prompt;
@@ -358,10 +361,20 @@
             document.getElementById('historyPanel').style.display = 'block';
         }
 
+        // 删除单条历史记录
+        function deleteHistoryItem(index) {
+            let history = JSON.parse(localStorage.getItem('ollamaHistory') || [];
+            history.splice(index, 1);
+            localStorage.setItem('ollamaHistory', JSON.stringify(history));
+            showHistory();
+        }
+
         // 清空历史记录
         document.getElementById('clearHistoryButton').addEventListener('click', () => {
-            localStorage.removeItem('ollamaHistory');
-            document.getElementById('historyList').innerHTML = '';
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem('ollamaHistory');
+                document.getElementById('historyList').innerHTML = '';
+            }
         });
 
         // 切换历史记录面板显示
