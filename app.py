@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 # 定义API响应类型
-ApiResponse = Dict[str, Union[str, Dict[str, str]] 
+ApiResponse = Dict[str, Union[str, Dict[str, str]]]
 
 # 首页路由
 @app.route('/')
-def index() -> str:
+def index():
     """
     处理根路径请求，返回首页模板
     
