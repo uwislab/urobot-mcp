@@ -200,8 +200,11 @@
                     <div><strong>${new Date(item.timestamp).toLocaleString()}</strong></div>
                     <div><strong>请求:</strong> ${item.endpoint}</div>
                     <div><strong>输入:</strong> ${item.prompt}</div>
-                    <div><strong>结果:</strong> ${item.result.substring(0, 100)}...</div>
-                    <button onclick="showHistoryDetail(${index})" style="margin-top: 5px; padding: 2px 5px; font-size: 12px;">查看详情</button>
+                    <div><strong>结果:</strong> ${item.result.substring(0, 100)}${item.result.length > 100 ? '...' : ''}</div>
+                    <div style="margin-top: 5px; display: flex; gap: 5px;">
+                        <button onclick="showHistoryDetail(${index})" style="padding: 2px 5px; font-size: 12px;">查看详情</button>
+                        <button onclick="deleteHistoryItem(${index})" style="padding: 2px 5px; font-size: 12px; background: #dc3545; color: white; border: none;">删除</button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -240,10 +243,20 @@
             }
         });
 
+        // 删除单条历史记录
+        function deleteHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            history.splice(index, 1);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            loadHistory();
+        }
+
         // 清除历史记录
         document.getElementById('clearHistoryButton').addEventListener('click', () => {
-            localStorage.removeItem(HISTORY_KEY);
-            document.getElementById('historyList').innerHTML = '<div>无历史记录</div>';
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem(HISTORY_KEY);
+                document.getElementById('historyList').innerHTML = '<div>无历史记录</div>';
+            }
         });
         // 获取DOM元素
         const runScript3Button = document.getElementById('runScript3Button');
