@@ -50,6 +50,7 @@ def generate_c_code(user_prompt: Optional[str] = None) -> str:
 
     try:
         # 调用Ollama生成代码
+        # 确保没有超时限制的调用
         response = interpreter.chat(
             "定位：一个能生成 C 语言程序的智能助手。"
             "能力：可以根据用户提供的需求准确生成相应的 C 语言代码，并以文本格式保存。"

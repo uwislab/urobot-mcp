@@ -80,8 +80,7 @@ def gen_c_code(user_prompt: Optional[str] = None) -> str:
         response = requests.post(
             DEEPSEEK_API_URL, 
             json=data, 
-            headers=headers,
-            timeout=None
+            headers=headers
         )
         logger.info(f"收到API响应，状态码: {response.status_code}")
         response.raise_for_status()  # 检查HTTP错误

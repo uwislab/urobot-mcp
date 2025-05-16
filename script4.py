@@ -77,7 +77,7 @@ def gen_plantuml(user_prompt: Optional[str] = None) -> str:
     
     try:
         # 发送API请求
-        response = requests.post(DEEPSEEK_API_URL, json=data, headers=headers, timeout=None)
+        response = requests.post(DEEPSEEK_API_URL, json=data, headers=headers)
         response.raise_for_status()  # 检查HTTP错误
         result = response.json()  # 解析JSON响应
         

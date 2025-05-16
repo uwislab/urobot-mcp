@@ -59,6 +59,7 @@ def generate_plantuml(user_prompt: Optional[str] = None) -> str:
 
     try:
         # 调用Ollama生成代码
+        # 确保没有超时限制的调用  
         response = interpreter.chat(
             "你是一个能生成 PlantUML 代码的智能助手。"
             "能力：能够根据输入的描述准确生成 PlantUML 代码，并以文本文件形式提供。"
