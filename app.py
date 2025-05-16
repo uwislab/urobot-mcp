@@ -145,5 +145,5 @@ def run_script4():
         }), 500
 # 主程序入口
 if __name__ == '__main__':
-    # 生产环境配置
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    # 开发环境配置，仅本地访问
+    app.run(debug=True, host='127.0.0.1', port=5000)
