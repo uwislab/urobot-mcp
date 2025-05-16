@@ -1,11 +1,23 @@
 import requests
 import os
+import logging
+from typing import Optional, Dict, Any
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Deepseek API 配置
 DEEPSEEK_API_KEY = "sk-a20ac497a8e64fa2837236671064394d"
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
 
-def gen_c_code(user_prompt=None):
+# API请求超时设置(秒)
+API_TIMEOUT = 30
+
+def gen_c_code(user_prompt: Optional[str] = None) -> str:
     """
     生成C语言代码的主函数
     通过Deepseek API生成朴素贝叶斯算法的C语言实现代码
@@ -38,8 +50,15 @@ def gen_c_code(user_prompt=None):
     }
     
     try:
+        logger.info(f"准备向Deepseek API发送请求，提示: {user_prompt}")
         # 发送API请求
-        response = requests.post(DEEPSEEK_API_URL, json=data, headers=headers)
+        response = requests.post(
+            DEEPSEEK_API_URL, 
+            json=data, 
+            headers=headers,
+            timeout=API_TIMEOUT
+        )
+        logger.info(f"收到API响应，状态码: {response.status_code}")
         response.raise_for_status()  # 检查HTTP错误
         result = response.json()  # 解析JSON响应
         

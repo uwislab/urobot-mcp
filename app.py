@@ -1,18 +1,39 @@
 from flask import Flask, request, jsonify, render_template
 import ollama
 import subprocess
+import logging
+from typing import Dict, Any, Union, Tuple
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # 初始化Flask应用
 app = Flask(__name__)
 
+# 定义API响应类型
+ApiResponse = Dict[str, Union[str, Dict[str, str]] 
+
 # 首页路由
 @app.route('/')
-def index():
+def index() -> str:
     """
     处理根路径请求，返回首页模板
+    
+    功能说明:
+    - 渲染并返回前端首页
+    - 首页包含基本功能导航
+    
     Returns:
-        HTML: 渲染后的index.html模板
+        str: 渲染后的index.html模板内容
+        
+    Raises:
+        TemplateNotFound: 如果模板文件不存在
     """
+    logger.info("访问首页")
     return render_template('index.html')
 
 @app.route('/call_ollama', methods=['POST'])

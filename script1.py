@@ -1,14 +1,38 @@
 import os
+import logging
+from typing import Dict, Any, Optional
+from interpreter import interpreter
 
-def generate_c_code():
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def generate_c_code(user_prompt: Optional[str] = None) -> str:
     """
     生成C语言代码的主函数
-    通过Ollama生成朴素贝叶斯算法的C语言实现代码
-    并将生成的代码保存到本地文件
     
-    Returns:
+    功能说明:
+    - 通过Ollama本地模型生成朴素贝叶斯算法的C语言实现代码
+    - 自动将生成的代码保存到指定路径
+    - 支持自定义用户提示
+    
+    参数:
+        user_prompt (str, optional): 自定义生成提示，默认为None
+        
+    返回:
         str: 生成结果信息，包含保存路径和生成的代码内容
+        
+    异常:
+        Exception: 生成或保存过程中出现的任何错误
+        
+    示例:
+        >>> result = generate_c_code("实现一个快速排序算法")
+        >>> print(result)
     """
+    logger.info("开始生成C语言代码")
     from interpreter import interpreter
 
     interpreter.offline = True
