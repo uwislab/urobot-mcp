@@ -1,287 +1,171 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="zh-CN">
 <head>
-    <!-- 页面基础设置 -->
-    <meta charset="UTF-8">  <!-- 字符编码 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局 -->
-    <title>调用Ollama - 首页</title>  <!-- 页面标题 -->
-    <style>
-        /* 页面整体样式 */
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;  /* 使用系统字体 */
-            background-image: url('static/background.png');  /* 背景图片 */
-            background-size: cover;  /* 背景图片覆盖整个页面 */
-            background-position: center;  /* 背景图片居中 */
-            background-attachment: fixed;  /* 背景图片固定 */
-            display: flex;
-            justify-content: center;  /* 水平居中 */
-            align-items: center;  /* 垂直居中 */
-            min-height: 100vh;  /* 最小高度为视口高度 */
-            margin: 0;
-            padding: 20px;  /* 内边距 */
-        }
-
-        /* 内容容器样式 */
-        .container {
-            background: rgba(255, 255, 255, 0.92);
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            max-width: 900px;
-            width: 100%;
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-        }
-
-        /* 标题样式 */
-        h1 {
-            color: #2a5298;  /* 主色调 */
-            text-align: center;  /* 居中 */
-            margin-bottom: 1.5rem;  /* 下边距 */
-            font-weight: 600;  /* 字体粗细 */
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);  /* 文字阴影 */
-        }
-
-        /* 输入框组样式 */
-        .input-group {
-            display: flex;
-            align-items: center;  /* 垂直居中 */
-            gap: 15px;  /* 元素间距 */
-            margin-bottom: 1.5rem;  /* 下边距 */
-            background: rgba(255, 255, 255, 0.9);  /* 半透明白色背景 */
-            padding: 15px;  /* 内边距 */
-            border-radius: 12px;  /* 圆角 */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* 阴影效果 */
-        }
-
-        /* 文本输入框样式 */
-        input[type="text"] {
-            flex: 1;  /* 自动填充剩余空间 */
-            padding: 12px 15px;  /* 内边距 */
-            border: 2px solid #e0e0e0;  /* 边框 */
-            border-radius: 8px;  /* 圆角 */
-            font-size: 1rem;  /* 字体大小 */
-            transition: all 0.3s ease;  /* 过渡效果 */
-            background: rgba(255, 255, 255, 0.9);  /* 背景颜色 */
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #2a5298;
-            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
-        }
-
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            min-width: 120px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            white-space: nowrap;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        button:hover::after {
-            opacity: 1;
-        }
-
-        /* 结果展示区域样式 */
-        #result {
-            margin-top: 1.5rem;  /* 上边距 */
-            padding: 1.5rem;  /* 内边距 */
-            background: rgba(255, 255, 255, 0.9);  /* 背景颜色 */
-            border-radius: 12px;  /* 圆角 */
-            border: 1px solid rgba(0, 0, 0, 0.1);  /* 边框 */
-            min-height: 150px;  /* 最小高度 */
-            white-space: pre-wrap;  /* 保留空白和换行 */
-            font-family: 'Consolas', monospace;  /* 等宽字体 */
-            overflow-x: auto;  /* 水平滚动 */
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);  /* 内阴影 */
-            position: relative;  /* 相对定位 */
-        }
-
-        /* 加载动画样式 */
-        .loader {
-            position: absolute;  /* 绝对定位 */
-            top: 50%;  /* 垂直居中 */
-            left: 50%;  /* 水平居中 */
-            transform: translate(-50%, -50%);  /* 精确居中 */
-            border: 4px solid #f3f3f3;  /* 边框 */
-            border-top: 4px solid #2a5298;  /* 顶部边框颜色 */
-            border-radius: 50%;  /* 圆形 */
-            width: 30px;  /* 宽度 */
-            height: 30px;  /* 高度 */
-            animation: spin 1s linear infinite;  /* 旋转动画 */
-            display: none;  /* 默认隐藏 */
-        }
-
-        @keyframes spin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        .input-group img {
-            height: 90px;
-            width: 100px;
-            border-radius: 8px;
-            object-fit: cover;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .input-group img:hover {
-            transform: scale(1.05);
-        }
-
-        #speechInputIcon {
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        #speechInputIcon:hover {
-            background: rgba(240, 240, 240, 0.9);
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* 脚本按钮样式 */
-        .script-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 1rem;
-            justify-content: center;
-        }
-        
-        .script-button {
-            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            min-width: 200px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .script-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .script-button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .script-button:hover::after {
-            opacity: 1;
-        }
-
-        /* 移动端响应式样式 */
-        @media (max-width: 600px) {
-            .container {
-                padding: 1rem;  /* 减少内边距 */
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调用Ollama - 首页</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2a5298',
+                        secondary: '#00b09b',
+                        accent: '#96c93d',
+                        neutral: '#f8fafc',
+                        dark: '#1e293b',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
             }
-            
-            .input-group {
-                flex-direction: column;  /* 垂直排列 */
-                gap: 10px;  /* 减少间距 */
-                padding: 1rem;  /* 调整内边距 */
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
             }
-            
-            button {
-                width: 100%;  /* 全宽按钮 */
-                margin: 5px 0;  /* 调整边距 */
+            .glass-effect {
+                @apply bg-white/90 backdrop-blur-md border border-white/30 shadow-xl;
             }
-            
-            .input-group img {
-                width: 80px;  /* 调整图片大小 */
-                height: 80px;
+            .btn-primary {
+                @apply bg-gradient-to-r from-primary to-accent text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary/50;
+            }
+            .btn-secondary {
+                @apply bg-white text-primary font-semibold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary/50;
+            }
+            .btn-script {
+                @apply bg-gradient-to-r from-secondary to-accent text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-secondary/50;
             }
         }
     </style>
 </head>
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen font-inter text-dark">
+    <!-- 背景装饰元素 -->
+    <div class="fixed inset-0 overflow-hidden -z-10">
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/3 -left-20 w-72 h-72 bg-secondary/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 right-1/4 w-80 h-80 bg-accent/10 rounded-full blur-3xl"></div>
+    </div>
 
-<body>
-    <div class="container">
-        <div class="script-buttons">
-            <button id="runScript1" class="script-button">生成C代码(Ollama)</button>
-            <button id="runScript2" class="script-button">生成PlantUML(Ollama)</button>
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- 头部 -->
+        <header class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white">
+                        <i class="fa-solid fa-robot text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
+                        Ollama助手
+                    </h1>
+                </div>
+                <nav>
+                    <button id="showHistoryButton" class="btn-secondary flex items-center gap-2">
+                        <i class="fa-solid fa-history"></i>
+                        <span class="hidden sm:inline">历史记录</span>
+                    </button>
+                </nav>
+            </div>
+            <p class="text-slate-600 mt-2">
+                强大的本地AI助手，帮你生成高质量的C代码和PlantUML图表
+            </p>
+        </header>
+
+        <!-- 功能按钮组 -->
+        <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button id="runScript1" class="btn-script flex items-center justify-center gap-2">
+                <i class="fa-solid fa-code text-xl"></i>
+                <span>生成C代码(Ollama)</span>
+            </button>
+            <button id="runScript2" class="btn-script flex items-center justify-center gap-2">
+                <i class="fa-solid fa-diagram-project text-xl"></i>
+                <span>生成PlantUML(Ollama)</span>
+            </button>
         </div>
-        <div class="input-group">
-            <img src="static/ollama.png" alt="输入框图片">
-            <input type="text" id="promptInput" placeholder="请输入提示词">
-            <img id="speechInputIcon" src="static/microphone.png" alt="语音输入">
-            <button id="callOllamaButton">发送</button>
-            <button onclick="window.location.href='/new_page'">转用deepseek</button>
-            <button id="showHistoryButton">历史</button>
+
+        <!-- 输入区域 -->
+        <div class="mb-6 glass-effect rounded-xl overflow-hidden">
+            <div class="p-4 flex flex-col md:flex-row items-center gap-4">
+                <div class="hidden md:block">
+                    <img src="static/ollama.png" alt="Ollama" class="h-16 w-16 rounded-lg object-cover shadow-md transition-transform duration-300 hover:scale-105">
+                </div>
+                <div class="flex-1">
+                    <input type="text" id="promptInput" placeholder="请输入提示词"
+                        class="w-full p-3 rounded-lg border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-300">
+                </div>
+                <div class="flex gap-2">
+                    <button id="speechInputIcon" class="p-3 rounded-full bg-white shadow-md hover:bg-slate-50 transition-all duration-300 flex items-center justify-center">
+                        <i class="fa-solid fa-microphone text-primary"></i>
+                    </button>
+                    <button id="callOllamaButton" class="btn-primary whitespace-nowrap">
+                        <i class="fa-solid fa-paper-plane mr-2"></i>发送
+                    </button>
+                    <button onclick="window.location.href='/new_page'" class="btn-secondary whitespace-nowrap">
+                        <i class="fa-solid fa-exchange mr-2"></i>转用deepseek
+                    </button>
+                </div>
+            </div>
         </div>
-        <div id="result">
-            <div class="loader" id="loader"></div>
-            <pre id="resultText" style="margin: 0;"></pre>
+
+        <!-- 结果显示区域 -->
+        <div class="mb-8 glass-effect rounded-xl overflow-hidden">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="font-semibold text-slate-700">AI生成结果</h3>
+                <div class="flex gap-2">
+                    <button id="copyButton" class="text-slate-600 hover:text-primary transition-colors duration-300">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                    <button id="clearButton" class="text-slate-600 hover:text-red-500 transition-colors duration-300">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-4 h-[clamp(300px,50vh,500px)] relative">
+                <div class="loader absolute inset-0 flex items-center justify-center bg-white/80 rounded-lg z-10 hidden">
+                    <div class="w-12 h-12 border-4 border-slate-200 border-t-primary rounded-full animate-spin"></div>
+                    <p class="ml-4 text-slate-600">思考中...</p>
+                </div>
+                <pre id="resultText" class="h-full overflow-y-auto text-slate-800 text-sm sm:text-base leading-relaxed"></pre>
+            </div>
         </div>
-        
+
         <!-- 历史记录面板 -->
-        <div id="historyPanel" style="display: none; margin-top: 20px; padding: 15px; background-color: rgba(255, 255, 255, 0.95); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); border: 1px solid rgba(0, 0, 0, 0.1);">
-            <h3>历史记录</h3>
-            <div id="historyList"></div>
-            <button id="clearHistoryButton" style="margin-top: 10px;">清空历史</button>
+        <div id="historyPanel" class="mb-8 glass-effect rounded-xl overflow-hidden hidden">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="font-semibold text-slate-700">历史记录</h3>
+                <button id="closeHistoryButton" class="text-slate-600 hover:text-red-500 transition-colors duration-300">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4 max-h-[400px] overflow-y-auto">
+                <div id="historyList" class="space-y-3">
+                    <!-- 历史记录将通过JS动态填充 -->
+                    <div class="text-center text-slate-500 py-8">暂无历史记录</div>
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200">
+                <button id="clearHistoryButton" class="btn-secondary text-sm py-2 px-4">
+                    <i class="fa-solid fa-trash mr-2"></i>清空历史
+                </button>
+            </div>
         </div>
+
+        <!-- 页脚 -->
+        <footer class="text-center text-slate-500 text-sm py-4">
+            <p>© 2023 Ollama助手 | 使用现代Web技术构建</p>
+        </footer>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 flex items-center gap-2 z-50">
+        <i class="fa-solid fa-check-circle"></i>
+        <span id="notificationText">操作成功</span>
     </div>
 
     <script>
@@ -289,6 +173,9 @@
         const promptInput = document.getElementById('promptInput');
         const callOllamaButton = document.getElementById('callOllamaButton');
         const speechInputIcon = document.getElementById('speechInputIcon');
+        const resultText = document.getElementById('resultText');
+        const copyButton = document.getElementById('copyButton');
+        const clearButton = document.getElementById('clearButton');
 
         // 语音输入功能
         speechInputIcon.addEventListener('click', function () {
@@ -300,83 +187,170 @@
                     // 去除句号并追加到现有内容
                     const cleanText = transcript.replace(/。/g, '');
                     promptInput.value = (promptInput.value + ' ' + cleanText).trim();
+
+                    // 显示通知
+                    showNotification('语音输入已添加到输入框');
                 };
                 recognition.start();  // 开始语音识别
+
+                // 显示识别中状态
+                speechInputIcon.classList.add('bg-primary');
+                speechInputIcon.classList.remove('bg-white');
+                speechInputIcon.querySelector('i').classList.add('text-white');
+                speechInputIcon.querySelector('i').classList.remove('text-primary');
+
+                recognition.onend = function() {
+                    // 恢复按钮状态
+                    speechInputIcon.classList.remove('bg-primary');
+                    speechInputIcon.classList.add('bg-white');
+                    speechInputIcon.querySelector('i').classList.remove('text-white');
+                    speechInputIcon.querySelector('i').classList.add('text-primary');
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('语音识别错误:', event.error);
+                    showNotification('语音识别出错: ' + event.error, 'error');
+                };
             } else {
-                alert('你的浏览器不支持语音识别功能。');
+                showNotification('你的浏览器不支持语音识别功能', 'error');
             }
         });
 
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            const icon = notification.querySelector('i');
+
+            // 设置通知内容和样式
+            notificationText.textContent = message;
+
+            if (type === 'error') {
+                notification.classList.remove('bg-slate-800');
+                notification.classList.add('bg-red-600');
+                icon.classList.remove('fa-check-circle');
+                icon.classList.add('fa-exclamation-circle');
+            } else {
+                notification.classList.remove('bg-red-600');
+                notification.classList.add('bg-slate-800');
+                icon.classList.remove('fa-exclamation-circle');
+                icon.classList.add('fa-check-circle');
+            }
+
+            // 显示通知
+            notification.classList.remove('translate-y-20', 'opacity-0');
+            notification.classList.add('translate-y-0', 'opacity-100');
+
+            // 3秒后隐藏通知
+            setTimeout(() => {
+                notification.classList.remove('translate-y-0', 'opacity-100');
+                notification.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
 
         // 历史记录功能
         const HISTORY_KEY = 'ollamaHistory';
-        
+
+        // 按字符长度截断字符串（兼容中文）
+        function truncate(str, length) {
+            let result = '';
+            let count = 0;
+            for (let i = 0; i < str.length && count < length; i++) {
+                const char = str[i];
+                result += char;
+                // 中文字符算1个长度，其他字符算0.5个长度
+                count += /[\u4e00-\u9fa5]/.test(char) ? 1 : 0.5;
+            }
+            return result + (count < str.length ? '...' : '');
+        }
+
         // 添加历史记录
         function addHistory(prompt, response, endpoint = 'Ollama') {
-            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]';
-            history = JSON.parse(history);
-            history.unshift({
-                timestamp: new Date().toISOString(),
-                endpoint,
-                prompt,
-                response
-            });
-            // 最多保存10条记录
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
-            loadHistory();
+            try {
+                // 修正：正确解析 localStorage 数据
+                let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                history.unshift({
+                    timestamp: new Date().toISOString(),
+                    endpoint,
+                    prompt,
+                    response
+                });
+                // 最多保存10条记录
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+                loadHistory(); // 更新历史记录显示
+            } catch (error) {
+                console.error('保存历史记录失败:', error);
+                showNotification('保存历史记录时出错，请稍后重试', 'error');
+            }
         }
 
         // 显示历史详情
         function showHistoryDetail(index) {
-            const history = JSON.parse(localStorage.getItem('ollamaHistory')) || [];
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
             const item = history[index];
             if (item) {
-                document.getElementById('resultText').innerText = 
-                    `[${new Date(item.timestamp).toLocaleString()}]\n提问: ${item.prompt}\n\n回答:\n${item.response}`;
+                resultText.innerText =
+                    `[${new Date(item.timestamp).toLocaleString()}]\n请求: ${item.endpoint}\n输入: ${item.prompt}\n\n结果:\n${item.response}`;
+                document.getElementById('historyPanel').classList.add('hidden'); // 查看详情后隐藏面板
             }
         }
 
         // 加载历史记录
         function loadHistory() {
-            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-            const historyList = document.getElementById('historyList');
-            historyList.innerHTML = history.map((item, index) => `
-                <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 5px;">
-                    <div><strong>${new Date(item.timestamp).toLocaleString()}</strong></div>
-                    <div><strong>请求:</strong> ${item.endpoint}</div>
-                    <div><strong>输入:</strong> ${item.prompt}</div>
-                    <div><strong>结果:</strong> ${item.response.substring(0, 100)}${item.response.length > 100 ? '...' : ''}</div>
-                    <div style="margin-top: 5px; display: flex; gap: 5px;">
-                        <button onclick="showHistoryDetail(${index})" style="padding: 2px 5px; font-size: 12px;">查看详情</button>
-                        <button onclick="deleteHistoryItem(${index})" style="padding: 2px 5px; font-size: 12px; background: #dc3545; color: white; border: none;">删除</button>
-                    </div>
-                </div>
-            `).join('');
-        }
+            try {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                const historyList = document.getElementById('historyList');
 
-        // 显示历史详情
-        function showHistoryDetail(index) {
-            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-            const item = history[index];
-            if (item) {
-                document.getElementById('resultText').innerText = 
-                    `[${new Date(item.timestamp).toLocaleString()}]\n请求: ${item.endpoint}\n输入: ${item.prompt}\n\n结果:\n${item.response}`;
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="text-center text-slate-500 py-8">暂无历史记录</div>';
+                    return;
+                }
+
+                historyList.innerHTML = history.map((item, index) => `
+                    <div class="bg-white rounded-lg shadow-sm p-4 transition-all duration-300 hover:shadow-md">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-medium text-slate-800">${item.endpoint}</h4>
+                            <span class="text-xs text-slate-500">${new Date(item.timestamp).toLocaleString()}</span>
+                        </div>
+                        <div class="text-sm text-slate-600 mb-2 line-clamp-2">
+                            <strong>输入:</strong> ${item.prompt || '无输入'}
+                        </div>
+                        <div class="text-sm text-slate-700 mb-3 line-clamp-3">
+                            <strong>结果:</strong> ${truncate(item.response, 100)}
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button onclick="showHistoryDetail(${index})" class="text-xs text-primary hover:text-accent transition-colors px-2 py-1 bg-blue-50 rounded">
+                                <i class="fa-solid fa-eye mr-1"></i>查看详情
+                            </button>
+                            <button onclick="deleteHistoryItem(${index})" class="text-xs text-white bg-red-500 hover:bg-red-600 transition-colors px-2 py-1 rounded">
+                                <i class="fa-solid fa-trash mr-1"></i>删除
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载历史记录失败:', error);
+                document.getElementById('historyList').innerHTML = '<div class="text-center text-red-500 py-8">加载历史记录时出错，请刷新页面</div>';
             }
         }
 
         // 删除单条历史记录
         function deleteHistoryItem(index) {
-            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-            history.splice(index, 1);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-            loadHistory();
+            if (confirm('确定要删除这条历史记录吗？')) {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                history.splice(index, 1);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                loadHistory();
+                showNotification('历史记录已删除');
+            }
         }
 
         // 清空历史记录
         document.getElementById('clearHistoryButton').addEventListener('click', () => {
             if (confirm('确定要清空所有历史记录吗？')) {
-                localStorage.removeItem('ollamaHistory');
-                document.getElementById('historyList').innerHTML = '';
+                localStorage.removeItem(HISTORY_KEY);
+                loadHistory();
+                showNotification('所有历史记录已清空');
             }
         });
 
@@ -385,24 +359,28 @@
             e.preventDefault();
             e.stopPropagation();
             const panel = document.getElementById('historyPanel');
-            const currentDisplay = window.getComputedStyle(panel).display;
-            if (currentDisplay === 'none') {
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
                 loadHistory();
-                panel.style.display = 'block';
-            } else {
-                panel.style.display = 'none';
             }
+        });
+
+        document.getElementById('closeHistoryButton').addEventListener('click', () => {
+            document.getElementById('historyPanel').classList.add('hidden');
         });
 
         // 点击页面其他地方关闭历史面板
         document.addEventListener('click', function(e) {
             const panel = document.getElementById('historyPanel');
             const historyBtn = document.getElementById('showHistoryButton');
-            if (panel.style.display === 'block' && 
-                e.target !== panel && 
+            const closeBtn = document.getElementById('closeHistoryButton');
+
+            if (!panel.classList.contains('hidden') &&
+                e.target !== panel &&
                 !panel.contains(e.target) &&
-                e.target !== historyBtn) {
-                panel.style.display = 'none';
+                e.target !== historyBtn &&
+                e.target !== closeBtn) {
+                panel.classList.add('hidden');
             }
         });
 
@@ -410,26 +388,32 @@
         document.getElementById('runScript1').addEventListener('click', async function() {
             try {
                 const prompt = "正在通过Ollama生成C代码...";
-                const loader = document.getElementById('loader');
-                const resultText = document.getElementById('resultText');
-                
-                loader.style.display = 'block';
+                const loader = document.querySelector('.loader');
+
+                loader.classList.remove('hidden');
                 resultText.innerText = prompt;
-                
+
                 const response = await fetch('/run_script1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP错误，状态码: ${response.status}`);
+                }
+
                 const data = await response.json();
-                
-                loader.style.display = 'none';
+
+                loader.classList.add('hidden');
                 resultText.innerText = data.result || data.error;
                 addHistory("Ollama生成C代码", data.result || data.error, "run_script1");
             } catch (error) {
-                loader.style.display = 'none';
+                const loader = document.querySelector('.loader');
+                loader.classList.add('hidden');
                 resultText.innerText = "请求出错：\n" + error.message;
+                showNotification('请求出错: ' + error.message, 'error');
             }
         });
 
@@ -437,26 +421,32 @@
         document.getElementById('runScript2').addEventListener('click', async function() {
             try {
                 const prompt = "正在通过Ollama生成PlantUML代码...";
-                const loader = document.getElementById('loader');
-                const resultText = document.getElementById('resultText');
-                
-                loader.style.display = 'block';
+                const loader = document.querySelector('.loader');
+
+                loader.classList.remove('hidden');
                 resultText.innerText = prompt;
-                
+
                 const response = await fetch('/run_script2', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP错误，状态码: ${response.status}`);
+                }
+
                 const data = await response.json();
-                
-                loader.style.display = 'none';
+
+                loader.classList.add('hidden');
                 resultText.innerText = data.result || data.error;
                 addHistory("Ollama生成PlantUML", data.result || data.error, "run_script2");
             } catch (error) {
-                loader.style.display = 'none';
+                const loader = document.querySelector('.loader');
+                loader.classList.add('hidden');
                 resultText.innerText = "请求出错：\n" + error.message;
+                showNotification('请求出错: ' + error.message, 'error');
             }
         });
 
@@ -464,13 +454,17 @@
         callOllamaButton.addEventListener('click', async function () {
             try {
                 const prompt = promptInput.value;
-                const loader = document.getElementById('loader');
-                const resultText = document.getElementById('resultText');
-                
+                if (!prompt.trim()) {
+                    showNotification('请输入提示词', 'error');
+                    return;
+                }
+
+                const loader = document.querySelector('.loader');
+
                 // 显示加载动画
-                loader.style.display = 'block';
+                loader.classList.remove('hidden');
                 resultText.innerText = '';  // 清空结果
-                
+
                 // 发送POST请求
                 const response = await fetch('/call_ollama', {
                     method: 'POST',
@@ -479,20 +473,56 @@
                     },
                     body: JSON.stringify({ prompt: prompt })
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP错误，状态码: ${response.status}`);
+                }
+
                 const data = await response.json();  // 解析响应
-                
+
                 // 隐藏加载动画并显示结果
-                loader.style.display = 'none';
+                loader.classList.add('hidden');
                 resultText.innerText = data.result;
-                // 保存到历史记录
-                addHistory(prompt, data.result, 'Ollama');
+
+                // 保存到历史记录，标记语音输入来源
+                const isSpeechInput = prompt.includes('[语音输入]');
+                const endpoint = isSpeechInput ? 'Ollama（语音）' : 'Ollama';
+                addHistory(prompt, data.result, endpoint);
+
+                showNotification('请求成功');
             } catch (error) {
                 // 处理异常
-                loader.style.display = 'none';
+                const loader = document.querySelector('.loader');
+                loader.classList.add('hidden');
                 resultText.innerText = "请求出错：\n" + error.message;
+                showNotification('请求出错: ' + error.message, 'error');
             }
         });
+
+        // 复制到剪贴板
+        copyButton.addEventListener('click', () => {
+            const text = resultText.innerText;
+            if (!text) {
+                showNotification('没有可复制的内容', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('已复制到剪贴板');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                showNotification('复制失败，请重试', 'error');
+            });
+        });
+
+        // 清空结果
+        clearButton.addEventListener('click', () => {
+            resultText.innerText = '';
+            showNotification('结果已清空');
+        });
+
+        // 初始化页面时加载历史记录
+        loadHistory();
     </script>
 </body>
-
 </html>
