@@ -313,7 +313,8 @@
         
         // 添加历史记录
         function addHistory(prompt, response, endpoint = 'Ollama') {
-            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || [];
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]';
+            history = JSON.parse(history);
             history.unshift({
                 timestamp: new Date().toISOString(),
                 endpoint,
@@ -380,11 +381,27 @@
         });
 
         // 切换历史记录面板显示
-        document.getElementById('showHistoryButton').addEventListener('click', () => {
+        document.getElementById('showHistoryButton').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             const panel = document.getElementById('historyPanel');
-            if (panel.style.display === 'none') {
-                showHistory();
+            const currentDisplay = window.getComputedStyle(panel).display;
+            if (currentDisplay === 'none') {
+                loadHistory();
+                panel.style.display = 'block';
             } else {
+                panel.style.display = 'none';
+            }
+        });
+
+        // 点击页面其他地方关闭历史面板
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('historyPanel');
+            const historyBtn = document.getElementById('showHistoryButton');
+            if (panel.style.display === 'block' && 
+                e.target !== panel && 
+                !panel.contains(e.target) &&
+                e.target !== historyBtn) {
                 panel.style.display = 'none';
             }
         });
