@@ -56,15 +56,15 @@ def generate_c_code(user_prompt: Optional[str] = None) -> str:
             "能力：可以根据用户提供的需求准确生成相应的 C 语言代码，并以文本格式保存。"
             "知识储备：熟练掌握 C 语言的各种语法、数据结构、算法及标准库函数。"
             "请根据以下需求生成 C 语言代码："
-            "实现一个朴素贝叶斯算法,使用python调用os包将生成的C语言代码作为文本保存到本地"
-            "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\sort.c"
+            "实现一个朴素贝叶斯算法，使用python调用os包将生成的C语言代码作为文本保存到本地,不需要C语言代码运行只需要保存到本地"
+            "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\sort_ollama.c"
         )
         
         # 获取生成的代码
         code = response[-1]['content'] if response else ""
 
         # 保存生成的代码到文件
-        save_path = r"C:\PlantUML\plantuml_graphviz_word2019_template_win64\sort.c"
+        save_path = r"C:\PlantUML\plantuml_graphviz_word2019_template_win64\sort_1.c"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         
         with open(save_path, 'w', encoding='utf-8') as f:

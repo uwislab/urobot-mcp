@@ -86,7 +86,7 @@ def gen_plantuml(user_prompt: Optional[str] = None) -> str:
             plantuml_code = result['choices'][0]['message']['content']  # 提取生成的代码
             
             # 保存生成的代码到文件
-            save_path = r"C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml.txt"
+            save_path = r"C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml_deepseek.txt"
             os.makedirs(os.path.dirname(save_path), exist_ok=True)  # 创建目录（如果不存在）
             
             # 写入文件

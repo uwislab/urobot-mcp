@@ -65,8 +65,8 @@ def generate_plantuml(user_prompt: Optional[str] = None) -> str:
             "能力：能够根据输入的描述准确生成 PlantUML 代码，并以文本文件形式提供。"
             "知识储备：精通 PlantUML 语法及各类图形绘制规则。"
             "请根据以下描述生成 PlantUML 代码："
-            "生成一个包含学生、教师、课程、班级、选课记录、成绩、考勤等七个对象的学生管理系统的PlantUML代码"
-            "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml.txt"
+            "以文本形式输出保存成：生成一个包含学生、教师、课程、班级、选课记录、成绩、考勤等七个对象的学生管理系统的PlantUML代码"
+            "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml_ollama.txt"
             "1.只调用os的python包，2.将PlantUML代码在python代码中作为文本写入txt文件"
         )
         
@@ -74,7 +74,7 @@ def generate_plantuml(user_prompt: Optional[str] = None) -> str:
         code = response[-1]['content'] if response else ""
 
         # 保存生成的代码到文件
-        save_path = r"C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml.txt"
+        save_path = r"C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml_1.txt"
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         
         with open(save_path, 'w', encoding='utf-8') as f:
