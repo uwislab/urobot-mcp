@@ -45,12 +45,14 @@ def generate_plantuml(user_prompt: Optional[str] = None) -> str:
         >>> print(result)
     """
     # 参数验证
-    if user_prompt is not None and not isinstance(user_prompt, str):
+    if user_prompt is None:
+        user_prompt = "生成一个包含学生、教师、课程、班级、选课记录、成绩、考勤等七个对象的学生管理系统的PlantUML代码"
+    elif not isinstance(user_prompt, str):
         logger.error(f"无效的用户提示词类型: {type(user_prompt)}")
         raise ValueError("user_prompt必须是字符串或None")
         
     logger.info("开始PlantUML代码生成流程")
-    logger.debug(f"用户提示词: {user_prompt}")
+    logger.info(f"用户提示词: {user_prompt}")
     from interpreter import interpreter
 
     interpreter.offline = True
@@ -61,11 +63,11 @@ def generate_plantuml(user_prompt: Optional[str] = None) -> str:
         # 调用Ollama生成代码
         # 确保没有超时限制的调用  
         response = interpreter.chat(
-            "你是一个能生成 PlantUML 代码的智能助手。"
-            "能力：能够根据输入的描述准确生成 PlantUML 代码，并以文本文件形式提供。"
-            "知识储备：精通 PlantUML 语法及各类图形绘制规则。"
-            "请根据以下描述生成 PlantUML 代码："
-            "以文本形式输出保存成：生成一个包含学生、教师、课程、班级、选课记录、成绩、考勤等七个对象的学生管理系统的PlantUML代码"
+            "你是一个能生成 PlantUML 代码的智能助手。\n"
+            "能力：能够根据输入的描述准确生成 PlantUML 代码，并以文本文件形式提供。\n"
+            "知识储备：精通 PlantUML 语法及各类图形绘制规则。\n"
+            "请根据以下描述生成 PlantUML 代码：\n"
+            f"{user_prompt}\n"
             "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml_ollama.txt"
             "1.只调用os的python包，2.将PlantUML代码在python代码中作为文本写入txt文件"
         )
