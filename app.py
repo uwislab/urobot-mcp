@@ -111,8 +111,10 @@ def run_script1():
         JSON: 包含生成结果或错误信息
     """
     try:
+        data = request.get_json()
+        user_prompt = data.get('prompt', None)
         from script1 import generate_c_code
-        output = generate_c_code()
+        output = generate_c_code(user_prompt)
         return jsonify({
             'result': output,
             'error': ''
@@ -131,8 +133,10 @@ def run_script2():
         JSON: 包含生成结果或错误信息
     """
     try:
+        data = request.get_json()
+        user_prompt = data.get('prompt', None)
         from script2 import generate_plantuml
-        output = generate_plantuml()
+        output = generate_plantuml(user_prompt)
         return jsonify({
             'result': output,
             'error': ''
