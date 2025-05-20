@@ -389,7 +389,9 @@
         // 加载历史记录
         function loadHistory() {
             try {
-                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                // 确保加载时也按时间倒序
+                history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 const historyList = document.getElementById('historyList');
                 historyList.innerHTML = history.map((item, index) => `
                     <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 5px;">

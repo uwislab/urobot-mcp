@@ -31,7 +31,6 @@ ApiResponse = Dict[str, Union[str, Dict[str, str]]]
 def index():
     """
     处理根路径请求，返回首页模板
-    
     功能说明:
     - 渲染并返回前端首页
     - 首页包含基本功能导航
@@ -61,7 +60,6 @@ def call_ollama():
             "prompt": "用户提示词",
             "model": "可选模型名称" 
         }
-        
     返回:
         JSON: {
             "result": "AI生成结果",

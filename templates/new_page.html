@@ -150,7 +150,9 @@
         // 加载历史记录
         function loadHistory() {
             const historyList = document.getElementById('historyList');
-            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            // 确保加载时也按时间倒序
+            history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             historyList.innerHTML = history.map((item, index) => `
                 <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 5px;">
@@ -175,12 +177,14 @@
         // 添加历史记录
         function addHistory(endpoint, prompt, result) {
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-            history.unshift({
+            history.push({
                 timestamp: new Date().toISOString(),
                 endpoint,
                 prompt,
                 result
             });
+            // 按时间倒序排序
+            history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             // 只保留最近10条记录
             localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
             loadHistory();
