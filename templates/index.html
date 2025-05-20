@@ -452,7 +452,7 @@
             }
         });
 
-        // 调用script3.py (Ollama生成C代码)
+        // 调用script1.py (Ollama生成C代码)
         document.getElementById('runScript1').addEventListener('click', async function() {
             try {
                 const prompt = promptInput.value || "生成C代码";
@@ -460,9 +460,9 @@
                 const resultText = document.getElementById('resultText');
 
                 loader.style.display = 'block';
-                resultText.innerText = "正在通过Ollama生成C代码...";
+                resultText.innerText = "正在生成C代码...";
 
-                const response = await fetch('/run_script3', {
+                const response = await fetch('/run_script1', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -473,14 +473,14 @@
 
                 loader.style.display = 'none';
                 resultText.innerText = data.result || data.error;
-                addHistory(prompt, data.result || data.error, "Ollama生成C代码");
+                addHistory(prompt, data.result || data.error, "生成C代码");
             } catch (error) {
                 loader.style.display = 'none';
                 resultText.innerText = "请求出错：\n" + error.message;
             }
         });
 
-        // 调用script4.py (Ollama生成PlantUML)
+        // 调用script2.py (Ollama生成PlantUML)
         document.getElementById('runScript2').addEventListener('click', async function() {
             try {
                 const prompt = promptInput.value || "生成PlantUML";
@@ -488,9 +488,9 @@
                 const resultText = document.getElementById('resultText');
 
                 loader.style.display = 'block';
-                resultText.innerText = "正在通过Ollama生成PlantUML代码...";
+                resultText.innerText = "正在生成PlantUML代码...";
 
-                const response = await fetch('/run_script4', {
+                const response = await fetch('/run_script2', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -501,7 +501,7 @@
 
                 loader.style.display = 'none';
                 resultText.innerText = data.result || data.error;
-                addHistory(prompt, data.result || data.error, "Ollama生成PlantUML");
+                addHistory(prompt, data.result || data.error, "生成PlantUML");
             } catch (error) {
                 loader.style.display = 'none';
                 resultText.innerText = "请求出错：\n" + error.message;
