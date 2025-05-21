@@ -4,6 +4,7 @@
 """
 
 import sys
+import argparse
 import requests
 import json
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
@@ -146,19 +147,41 @@ class RobotRemoteGUI(QMainWindow):
         self.robot_id = index
         
     def _send_c_command(self, c_code):
+        """发送C命令到机器人服务器"""
         try:
             url = f"{self.base_url}/execute_c_program"
             data = {
                 "robot_id": self.robot_id,
-                "program": c_code
+                "program": c_code.strip()
             }
-            response = requests.post(url, json=data)
+            headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+            
+            response = requests.post(
+                url,
+                json=data,
+                headers=headers,
+                timeout=3
+            )
+            
             if response.status_code == 200:
-                self.status_label.setText('状态: 命令执行成功')
+                result = response.json()
+                if result.get('status') == 'success':
+                    self.status_label.setText('✓ 命令执行成功')
+                    self.status_label.setStyleSheet("color: green;")
+                else:
+                    error_msg = result.get('error', '未知错误')
+                    self.status_label.setText(f'✗ 执行失败: {error_msg}')
+                    self.status_label.setStyleSheet("color: red;")
             else:
-                self.status_label.setText(f'状态: 命令执行失败 - {response.text}')
+                self.status_label.setText(f'✗ 服务器错误 ({response.status_code})')
+                self.status_label.setStyleSheet("color: red;")
+                
         except requests.exceptions.RequestException as e:
-            self.status_label.setText(f'状态: 连接服务器失败 - {str(e)}')
+            self.status_label.setText(f'✗ 连接失败: {str(e)}')
+            self.status_label.setStyleSheet("color: red;")
             
     def update_status(self):
         try:
@@ -208,16 +231,23 @@ class RobotRemoteGUI(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     
-    # 从命令行参数获取主机和端口
-    host = 'localhost'
-    port = 8080
-    if len(sys.argv) > 1:
-        addr = sys.argv[1]
-        if ':' in addr:
-            host, port = addr.split(':')
-            port = int(port)
-        else:
-            host = addr
+    # 解析命令行参数
+    parser = argparse.ArgumentParser(description='机器人遥控器GUI')
+    parser.add_argument('address', nargs='?', default='localhost:8080',
+                      help='服务器地址，格式: host[:port] (默认: localhost:8080)')
+    args = parser.parse_args()
+
+    # 处理地址参数
+    if ':' in args.address:
+        host, port_str = args.address.split(':')
+        try:
+            port = int(port_str)
+        except ValueError:
+            print(f"错误: 端口号必须为整数，使用默认端口8080")
+            port = 8080
+    else:
+        host = args.address
+        port = 8080
     
     window = RobotRemoteGUI(host, port)
     window.show()
