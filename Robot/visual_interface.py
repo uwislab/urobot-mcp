@@ -85,6 +85,7 @@ def execute_on_robot(robot_id=0):
             },
             timeout=5
         )
+        print("HTTP响应:", response.text)  # 添加调试输出
         if response.status_code != 200:
             return {'error': f'HTTP错误 {response.status_code}'}
         return response.json()

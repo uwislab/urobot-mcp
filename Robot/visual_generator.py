@@ -43,20 +43,19 @@ class VisualProgramGenerator:
         })
     
     def generate_c_code(self):
-        c_lines = ["void main() {"]
+        c_lines = []
         for block in self.blocks:
             if block['type'] == 'move':
                 if block['direction'] == 'forward':
-                    c_lines.append(f"    forward({block['speed']}, {block['distance']});")
+                    c_lines.append(f"forward({block['speed']}, {block['distance']});")
                 else:
-                    c_lines.append(f"    back({block['speed']}, {block['distance']});")
+                    c_lines.append(f"back({block['speed']}, {block['distance']});")
             elif block['type'] == 'turn_left':
-                c_lines.append(f"    turn_left({block['degrees']});")
+                c_lines.append(f"turn_left({block['degrees']});")
             elif block['type'] == 'turn_right':
-                c_lines.append(f"    turn_right({block['degrees']});")
+                c_lines.append(f"turn_right({block['degrees']});")
             elif block['type'] == 'beep':
-                c_lines.append(f"    beep({block['frequency']}, {block['duration']});")
-        c_lines.append("}")
+                c_lines.append(f"beep({block['frequency']}, {block['duration']});")
         return '\n'.join(c_lines)
     
     def execute_on_robot(self, robot_id=0):
