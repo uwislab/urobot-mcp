@@ -161,9 +161,9 @@ def main():
                     elif current_block == 'back':
                         generator.add_move_back(*params)
                     elif current_block == 'left':
-                        generator.add_turn_left(params[0])  # 只传角度
+                        generator.add_turn_left(params[0])
                     elif current_block == 'right':
-                        generator.add_turn_right(params[0])  # 只传角度
+                        generator.add_turn_right(params[0])
                     
                     current_block = None
                     param_inputs = []

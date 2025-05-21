@@ -558,6 +558,7 @@ def main():
                 cmd, args = robot.command_queue.pop(0)
                 robot.executing = True
                 try:
+                    print(f"正在执行命令: {cmd} {args}")  # 调试输出
                     getattr(robot, cmd)(*args)
                 except Exception as e:
                     print(f"执行命令{cmd}出错:", e)

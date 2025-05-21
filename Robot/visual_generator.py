@@ -23,15 +23,17 @@ class VisualProgramGenerator:
             'distance': distance
         })
     
-    def add_turn(self, direction, degrees=90):
-        """添加转向指令
-        Args:
-            direction: 'left'或'right'
-            degrees: 转向角度
-        """
+    def add_turn_left(self, degrees=90):
+        """添加左转指令"""
         self.blocks.append({
-            'type': 'turn',
-            'direction': direction,
+            'type': 'turn_left',
+            'degrees': degrees
+        })
+    
+    def add_turn_right(self, degrees=90):
+        """添加右转指令"""
+        self.blocks.append({
+            'type': 'turn_right', 
             'degrees': degrees
         })
     
