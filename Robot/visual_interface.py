@@ -54,3 +54,114 @@ while running:
     pygame.display.flip()
 
 pygame.quit()
+"""
+机器人可视化编程界面
+提供图形化按钮来生成C代码并发送到仿真系统
+"""
+
+import tkinter as tk
+from tkinter import messagebox
+import requests
+import json
+
+class VisualInterface:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("机器人可视化编程")
+        self.root.geometry("800x600")
+        
+        # 程序代码存储
+        self.program_lines = []
+        
+        # 创建界面布局
+        self.create_widgets()
+        
+    def create_widgets(self):
+        # 左侧控制面板
+        control_frame = tk.Frame(self.root, width=200, bg="#f0f0f0")
+        control_frame.pack(side=tk.LEFT, fill=tk.Y, padx=5, pady=5)
+        
+        # 控制按钮
+        tk.Button(control_frame, text="前进", command=self.add_forward, height=2, width=15).pack(pady=5)
+        tk.Button(control_frame, text="左转", command=self.add_turn_left, height=2, width=15).pack(pady=5)
+        tk.Button(control_frame, text="右转", command=self.add_turn_right, height=2, width=15).pack(pady=5)
+        
+        # 机器人选择
+        tk.Label(control_frame, text="选择机器人:", bg="#f0f0f0").pack(pady=(20,5))
+        self.robot_var = tk.IntVar(value=0)
+        for i in range(2):  # 默认支持2个机器人
+            tk.Radiobutton(control_frame, text=f"机器人 {i}", variable=self.robot_var, 
+                          value=i, bg="#f0f0f0").pack(anchor=tk.W)
+        
+        # 执行按钮
+        tk.Button(control_frame, text="执行程序", command=self.execute_program, 
+                 height=2, width=15, bg="#4CAF50", fg="white").pack(pady=20)
+        
+        # 清空按钮
+        tk.Button(control_frame, text="清空程序", command=self.clear_program, 
+                 height=2, width=15, bg="#f44336", fg="white").pack()
+        
+        # 右侧代码预览
+        code_frame = tk.Frame(self.root)
+        code_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        tk.Label(code_frame, text="生成的C代码:").pack(anchor=tk.W)
+        self.code_text = tk.Text(code_frame, wrap=tk.WORD, font=("Courier", 12))
+        self.code_text.pack(fill=tk.BOTH, expand=True)
+        
+        # 初始代码
+        self.update_code_display()
+    
+    def add_forward(self):
+        self.program_lines.append("    forward(4, 1);")
+        self.update_code_display()
+    
+    def add_turn_left(self):
+        self.program_lines.append("    turn_left(90);")
+        self.update_code_display()
+    
+    def add_turn_right(self):
+        self.program_lines.append("    turn_right(90);") 
+        self.update_code_display()
+    
+    def clear_program(self):
+        self.program_lines = []
+        self.update_code_display()
+    
+    def update_code_display(self):
+        self.code_text.delete(1.0, tk.END)
+        self.code_text.insert(tk.END, "void main() {\n")
+        for line in self.program_lines:
+            self.code_text.insert(tk.END, line + "\n")
+        self.code_text.insert(tk.END, "}\n")
+    
+    def execute_program(self):
+        if not self.program_lines:
+            messagebox.showwarning("警告", "请先添加程序指令!")
+            return
+            
+        full_program = "void main() {\n" + "\n".join(self.program_lines) + "\n}"
+        
+        try:
+            response = requests.post(
+                'http://localhost:8080/execute_c_program',
+                json={
+                    'robot_id': self.robot_var.get(),
+                    'program': full_program
+                }
+            )
+            
+            if response.status_code == 200:
+                messagebox.showinfo("成功", "程序已发送到机器人!")
+            else:
+                messagebox.showerror("错误", f"执行失败: {response.json().get('error', '未知错误')}")
+        except Exception as e:
+            messagebox.showerror("错误", f"无法连接到服务器: {str(e)}")
+
+def main():
+    root = tk.Tk()
+    app = VisualInterface(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
