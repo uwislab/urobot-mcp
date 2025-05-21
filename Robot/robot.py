@@ -366,45 +366,31 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         robot = self.robot_manager.get_robot(robot_id)
         robot.command_queue = []  # 清空之前的命令
         
-        # 添加对循环的支持
-        in_loop = False
-        loop_count = 0
-        loop_commands = []
-        
         for line in c_code.split('\n'):
             line = line.strip()
             if not line or line.startswith(('//', '/*', '*/', '*')):
                 continue
             
-            # 处理for循环
-            if line.startswith('for'):
-                in_loop = True
-                parts = line[4:-1].split(';')
-                loop_count = int(parts[1].split('<')[1].strip())
-                continue
-            elif in_loop and line == '}':
-                in_loop = False
-                for _ in range(loop_count):
-                    robot.command_queue.extend(loop_commands)
-                loop_commands = []
-                continue
-            
-            command = None
-            if line.startswith('forward('):
-                params = line[8:-2].split(',')
-                command = ('forward', (int(params[0]), int(params[1])))
-            elif line.startswith('turn_left('):
-                degrees = int(line[10:-2])
-                command = ('turn_left', (degrees,))
-            elif line.startswith('turn_right('):
-                degrees = int(line[11:-2])
-                command = ('turn_right', (degrees,))
-            
-            if command:
-                if in_loop:
-                    loop_commands.append(command)
-                else:
-                    robot.command_queue.append(command)
+            # 解析标准C函数调用
+            if line.startswith(('forward(', 'back(', 'turn_left(', 'turn_right(', 'beep(', 'gpp_say(')):
+                func_name = line.split('(')[0]
+                params = line[line.find('(')+1:line.rfind(')')].split(',')
+                
+                # 处理字符串参数
+                params = [p.strip().strip('"') for p in params]
+                
+                if func_name == 'forward':
+                    robot.command_queue.append(('forward', (int(params[0]), int(params[1]))))
+                elif func_name == 'back':
+                    robot.command_queue.append(('back', (int(params[0]), int(params[1]))))
+                elif func_name == 'turn_left':
+                    robot.command_queue.append(('turn_left', (int(params[0]),)))
+                elif func_name == 'turn_right':
+                    robot.command_queue.append(('turn_right', (int(params[0]),)))
+                elif func_name == 'beep':
+                    robot.command_queue.append(('beep', (int(params[0]), int(params[1]))))
+                elif func_name == 'gpp_say':
+                    robot.command_queue.append(('gpp_say', (int(params[0]), params[1])))
             
             # Handle variable declarations
             elif line.startswith('int ') or line.startswith('float '):

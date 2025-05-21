@@ -70,7 +70,7 @@ def draw_button(screen, rect, text, color=BLUE):
 def execute_on_robot(robot_id=0):
     """执行生成的C代码到指定机器人"""
     c_program = generator.generate_c_code()
-    print("正在执行代码:\n", c_program)  # 调试输出
+    print("正在执行的C代码:\n", c_program)  # 调试输出
     
     try:
         response = requests.post(
@@ -81,7 +81,8 @@ def execute_on_robot(robot_id=0):
             },
             timeout=5
         )
-        response.raise_for_status()
+        if response.status_code != 200:
+            return {'error': f'HTTP错误 {response.status_code}'}
         return response.json()
     except requests.exceptions.ConnectionError:
         return {'error': '无法连接到服务器，请先运行robot.py'}

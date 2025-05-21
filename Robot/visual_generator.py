@@ -51,6 +51,8 @@ class VisualProgramGenerator:
                 c_lines.append(f"    turn_{block['direction']}({block['degrees']});")
             elif block['type'] == 'beep':
                 c_lines.append(f"    beep({block['frequency']}, {block['duration']});")
+            elif block['type'] == 'say':
+                c_lines.append(f'    gpp_say({block["mode"]}, "{block["text"]}");')
         c_lines.append("}")
         return '\n'.join(c_lines)
     
