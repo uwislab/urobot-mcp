@@ -557,8 +557,12 @@ def main():
             if robot.command_queue and not robot.executing:
                 cmd, args = robot.command_queue.pop(0)
                 robot.executing = True
-                getattr(robot, cmd)(*args)
-                robot.executing = False
+                try:
+                    getattr(robot, cmd)(*args)
+                except Exception as e:
+                    print(f"执行命令{cmd}出错:", e)
+                finally:
+                    robot.executing = False
             
         # 绘制场景
         screen.fill(WHITE)

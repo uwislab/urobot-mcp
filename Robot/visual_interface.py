@@ -34,7 +34,11 @@ BLOCKS = {
     'right': {'rect': pygame.Rect(50, 340, 200, 50), 'text': "右转", 'params': [
         {'name': "角度", 'default': 90, 'range': (1, 360)}
     ]},
-    'execute': {'rect': pygame.Rect(300, 500, 200, 50), 'text': "执行"}
+    'execute': {'rect': pygame.Rect(300, 500, 200, 50), 'text': "执行"},
+    'beep': {'rect': pygame.Rect(50, 420, 200, 50), 'text': "蜂鸣", 'params': [
+        {'name': "频率", 'default': 440, 'range': (20, 2000)},
+        {'name': "时长", 'default': 500, 'range': (100, 3000)}
+    ]}
 }
 
 class ParamInput:

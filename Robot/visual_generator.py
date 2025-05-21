@@ -46,13 +46,16 @@ class VisualProgramGenerator:
         c_lines = ["void main() {"]
         for block in self.blocks:
             if block['type'] == 'move':
-                c_lines.append(f"    {block['direction']}({block['speed']}, {block['distance']});")
-            elif block['type'] == 'turn':
-                c_lines.append(f"    turn_{block['direction']}({block['degrees']});")
+                if block['direction'] == 'forward':
+                    c_lines.append(f"    forward({block['speed']}, {block['distance']});")
+                else:
+                    c_lines.append(f"    back({block['speed']}, {block['distance']});")
+            elif block['type'] == 'turn_left':
+                c_lines.append(f"    turn_left({block['degrees']});")
+            elif block['type'] == 'turn_right':
+                c_lines.append(f"    turn_right({block['degrees']});")
             elif block['type'] == 'beep':
                 c_lines.append(f"    beep({block['frequency']}, {block['duration']});")
-            elif block['type'] == 'say':
-                c_lines.append(f'    gpp_say({block["mode"]}, "{block["text"]}");')
         c_lines.append("}")
         return '\n'.join(c_lines)
     
