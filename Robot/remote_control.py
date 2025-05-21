@@ -13,7 +13,19 @@ class RobotRemoteControl(cmd.Cmd):
     """机器人遥控器命令行界面"""
     
     prompt = 'robot> '
-    intro = '机器人遥控器 (输入help查看命令)'
+    intro = '''机器人遥控器 (输入help查看命令)
+    
+示例命令:
+  forward 4 5    - 以速度4前进5单位
+  left 90        - 左转90度
+  say "你好"     - 机器人说话
+  beep 440 1000  - 发出440Hz蜂鸣1秒
+  exec "square"  - 执行画正方形示例
+  exec "circle"  - 执行画圆形示例
+  exec "poem"    - 朗诵诗歌
+  
+输入 quit 退出
+'''
     
     def __init__(self, host='localhost', port=8080):
         super().__init__()
@@ -83,11 +95,44 @@ class RobotRemoteControl(cmd.Cmd):
         print(f"已切换到机器人 {self.robot_id}")
     
     def do_exec(self, arg):
-        """执行C代码: exec <C代码>"""
+        """执行C代码: exec <C代码>
+        示例:
+        exec "forward(4, 5); turn_left(90);"
+        exec "for(int i=0;i<4;i++){forward(4,2);turn_right(90);}"
+        """
         if not arg:
             print("用法: exec <C代码>")
+            print("示例命令:")
+            print("  square - 画正方形")
+            print("  circle - 画圆形路径")
+            print("  poem - 朗诵诗歌")
             return
-        self._send_c_command(arg)
+            
+        # 预定义示例命令
+        if arg == "square":
+            c_code = """
+            for(int i=0; i<4; i++) {
+                forward(4, 3);
+                turn_right(90);
+            }
+            """
+        elif arg == "circle":
+            c_code = """
+            for(int i=0; i<36; i++) {
+                forward(2, 1);
+                turn_right(10);
+            }
+            """
+        elif arg == "poem":
+            c_code = """
+            gpp_say(1, "静夜思");
+            gpp_say(1, "作者李白");
+            gpp_say(1, "床前明月光，疑是地上霜。举头望明月，低头思故乡。");
+            """
+        else:
+            c_code = arg
+            
+        self._send_c_command(c_code)
     
     def do_quit(self, arg):
         """退出遥控器"""
