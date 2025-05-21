@@ -15,6 +15,7 @@ import threading
 import base64
 import ctypes
 import argparse
+import json
 
 # 初始化pygame图形库
 pygame.init()
@@ -289,6 +290,29 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.robot_manager = kwargs.pop('robot_manager')
         self.last_command = ""
         super().__init__(*args, **kwargs)
+    def do_POST(self):
+        if self.path == '/execute_c_program':
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            
+            try:
+                data = json.loads(post_data.decode())
+                robot_id = data.get('robot_id', 0)
+                c_program = data['program']
+                
+                robot = self.robot_manager.get_robot(robot_id)
+                robot.last_command = c_program
+                self.execute_c_code(robot_id, c_program)
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({'status': 'success'}).encode())
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode())
+
     def do_GET(self):
         if self.path.startswith('/robot.html'):
             params = self.path.split('?')[1].split('&')
@@ -340,51 +364,47 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
     def execute_c_code(self, robot_id, c_code):
         robot = self.robot_manager.get_robot(robot_id)
-        self.last_command = c_code  # 保存最后接收到的命令
+        robot.command_queue = []  # 清空之前的命令
         
-        # Clear previous commands if it's a new program
-        if c_code.startswith('int main()'):
-            robot.command_queue = []
-            
-        # Parse and queue commands
-        lines = c_code.split('\n')
-        for line in lines:
+        # 添加对循环的支持
+        in_loop = False
+        loop_count = 0
+        loop_commands = []
+        
+        for line in c_code.split('\n'):
             line = line.strip()
-            if not line or line.startswith('//') or line.startswith('/*'):
+            if not line or line.startswith(('//', '/*', '*/', '*')):
                 continue
             
-            # Handle function calls
+            # 处理for循环
+            if line.startswith('for'):
+                in_loop = True
+                parts = line[4:-1].split(';')
+                loop_count = int(parts[1].split('<')[1].strip())
+                continue
+            elif in_loop and line == '}':
+                in_loop = False
+                for _ in range(loop_count):
+                    robot.command_queue.extend(loop_commands)
+                loop_commands = []
+                continue
+            
+            command = None
             if line.startswith('forward('):
-                params = line[8:-1].split(',')
-                robot.forward(int(params[0]), int(params[1]))
-            elif line.startswith('back('):
-                params = line[5:-1].split(',')
-                robot.back(int(params[0]), int(params[1]))
+                params = line[8:-2].split(',')
+                command = ('forward', (int(params[0]), int(params[1])))
             elif line.startswith('turn_left('):
-                robot.turn_left(int(line[10:-1]))
+                degrees = int(line[10:-2])
+                command = ('turn_left', (degrees,))
             elif line.startswith('turn_right('):
-                robot.turn_right(int(line[11:-1]))
-            elif line.startswith('gpp_say('):
-                params = line[8:-1].split(',')
-                mode = int(params[0])
-                text = params[1].strip().strip('"')
-                robot.gpp_say(mode, text)
-            elif line.startswith('beep('):
-                params = line[5:-1].split(',')
-                robot.beep(int(params[0]), int(params[1]))
-            elif line.startswith('stop('):
-                robot.speed = 0
-            elif line.startswith('set_speed('):
-                speed = int(line[10:-1])
-                robot.speed = min(8, max(1, speed))
-            elif line.startswith('get_position()'):
-                x = int(robot.x)
-                y = int(robot.y)
-                self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.end_headers()
-                self.wfile.write(f'{{"x":{x},"y":{y}}}'.encode())
-                return
+                degrees = int(line[11:-2])
+                command = ('turn_right', (degrees,))
+            
+            if command:
+                if in_loop:
+                    loop_commands.append(command)
+                else:
+                    robot.command_queue.append(command)
             
             # Handle variable declarations
             elif line.startswith('int ') or line.startswith('float '):
