@@ -208,7 +208,7 @@
             `).join('');
         }
 
-        // 显示历史详情
+        // 显示历史详情history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         function showHistoryDetail(index) {
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
             const item = history[index];
@@ -378,7 +378,7 @@
                 if (isListening) {
                     recognition.start();
                     voiceInputButton.innerHTML = `
-                        <img src="../static/microphone-active.png" alt="语音输入中" style="width: 24px; height: 24px;">
+                        <img src="../static/microphone.png" alt="语音输入中" style="width: 24px; height: 24px;">
                     `;
                 } else {
                     recognition.stop();
