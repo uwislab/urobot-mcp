@@ -1,10 +1,32 @@
 import pygame
+import requests
 from visual_generator import VisualProgramGenerator
 
 # 初始化
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 generator = VisualProgramGenerator()
+
+def execute_on_robot(robot_id=0):
+    """执行生成的C代码到指定机器人"""
+    c_program = generator.generate_c_code()
+    try:
+        response = requests.post(
+            'http://localhost:8080/execute_c_program',
+            json={
+                'robot_id': robot_id,
+                'program': c_program
+            },
+            timeout=5  # 添加超时
+        )
+        response.raise_for_status()  # 检查HTTP错误
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"请求失败: {e}")
+        return {'error': str(e)}
+    except ValueError as e:
+        print(f"JSON解析失败: {e}")
+        return {'error': 'Invalid server response'}
 
 # 积木块定义
 BLOCKS = {
@@ -48,8 +70,13 @@ while running:
                     elif name == 'right':
                         generator.add_turn('right', 90)  # 右转90度
                     elif name == 'execute':
-                        result = generator.execute_on_robot()
+                        result = execute_on_robot()
                         print("执行结果:", result)
+                        if 'error' in result:
+                            # 显示错误信息
+                            font = pygame.font.SysFont(None, 30)
+                            error_text = font.render(f"错误: {result['error']}", True, (255, 0, 0))
+                            screen.blit(error_text, (300, 550))
     
     pygame.display.flip()
 
@@ -57,6 +84,16 @@ pygame.quit()
 """
 机器人可视化编程界面
 提供图形化按钮来生成C代码并发送到仿真系统
+
+主要功能:
+- 通过图形界面生成机器人控制代码
+- 发送代码到仿真服务器执行
+- 显示执行结果和错误信息
+
+使用说明:
+1. 点击"前进"、"左转"、"右转"按钮添加指令
+2. 点击"执行"按钮发送代码到机器人
+3. 错误信息会显示在界面底部
 """
 
 import tkinter as tk
