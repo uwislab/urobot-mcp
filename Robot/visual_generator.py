@@ -13,20 +13,44 @@ class VisualProgramGenerator:
             'distance': distance
         })
     
-    def add_turn(self, direction, degrees):
+    def add_move_back(self, speed=4, distance=1):
+        self.blocks.append({
+            'type': 'move',
+            'direction': 'back',
+            'speed': speed,
+            'distance': distance
+        })
+    
+    def add_turn_left(self, degrees=90):
         self.blocks.append({
             'type': 'turn',
-            'direction': direction,
+            'direction': 'left',
             'degrees': degrees
+        })
+    
+    def add_turn_right(self, degrees=90):
+        self.blocks.append({
+            'type': 'turn',
+            'direction': 'right',
+            'degrees': degrees
+        })
+    
+    def add_beep(self, frequency=440, duration=500):
+        self.blocks.append({
+            'type': 'beep',
+            'frequency': frequency,
+            'duration': duration
         })
     
     def generate_c_code(self):
         c_lines = ["void main() {"]
         for block in self.blocks:
             if block['type'] == 'move':
-                c_lines.append(f"    forward({block['speed']}, {block['distance']});")
+                c_lines.append(f"    {block['direction']}({block['speed']}, {block['distance']});")
             elif block['type'] == 'turn':
                 c_lines.append(f"    turn_{block['direction']}({block['degrees']});")
+            elif block['type'] == 'beep':
+                c_lines.append(f"    beep({block['frequency']}, {block['duration']});")
         c_lines.append("}")
         return '\n'.join(c_lines)
     
