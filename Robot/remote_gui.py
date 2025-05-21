@@ -238,16 +238,23 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # 处理地址参数
+    if args.address.startswith('[') and args.address.endswith(']'):
+        # 移除示例中的方括号
+        args.address = args.address[1:-1]
+    
     if ':' in args.address:
-        host, port_str = args.address.split(':')
+        parts = args.address.split(':')
+        host = parts[0]
         try:
-            port = int(port_str)
+            port = int(parts[1]) if len(parts) > 1 else 8080
         except ValueError:
-            print(f"错误: 端口号必须为整数，使用默认端口8080")
+            print("警告: 端口号无效，使用默认端口8080")
             port = 8080
     else:
         host = args.address
         port = 8080
+    
+    print(f"正在连接到: {host}:{port}")
     
     window = RobotRemoteGUI(host, port)
     window.show()
