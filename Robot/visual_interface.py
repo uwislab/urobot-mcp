@@ -42,11 +42,11 @@ while running:
             for name, block in BLOCKS.items():
                 if block['rect'].collidepoint(event.pos):
                     if name == 'forward':
-                        generator.add_move_forward(1,1,1)
+                        generator.add_move_forward(4, 1)  # 速度4，距离1
                     elif name == 'left':
-                        generator.add_turn(1,'left', 90)
+                        generator.add_turn('left', 90)  # 左转90度
                     elif name == 'right':
-                        generator.add_turn(1,'right', 90)
+                        generator.add_turn('right', 90)  # 右转90度
                     elif name == 'execute':
                         result = generator.execute_on_robot()
                         print("执行结果:", result)

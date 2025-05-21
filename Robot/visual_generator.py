@@ -6,6 +6,7 @@ class VisualProgramGenerator:
         self.blocks = []
         
     def add_move_forward(self, speed=4, distance=1):
+        """添加前进指令"""
         self.blocks.append({
             'type': 'move',
             'direction': 'forward',
@@ -14,6 +15,7 @@ class VisualProgramGenerator:
         })
     
     def add_move_back(self, speed=4, distance=1):
+        """添加后退指令"""
         self.blocks.append({
             'type': 'move',
             'direction': 'back',
@@ -21,17 +23,15 @@ class VisualProgramGenerator:
             'distance': distance
         })
     
-    def add_turn_left(self, degrees=90):
+    def add_turn(self, direction, degrees=90):
+        """添加转向指令
+        Args:
+            direction: 'left'或'right'
+            degrees: 转向角度
+        """
         self.blocks.append({
             'type': 'turn',
-            'direction': 'left',
-            'degrees': degrees
-        })
-    
-    def add_turn_right(self, degrees=90):
-        self.blocks.append({
-            'type': 'turn',
-            'direction': 'right',
+            'direction': direction,
             'degrees': degrees
         })
     
