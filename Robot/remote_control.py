@@ -150,10 +150,13 @@ class RobotRemoteControl(cmd.Cmd):
             response = requests.post(url, json=data)
             if response.status_code == 200:
                 print("命令执行成功")
+                return True
             else:
                 print(f"命令执行失败: {response.text}")
+                return False
         except requests.exceptions.RequestException as e:
             print(f"连接服务器失败: {e}")
+            return False
 
 def main():
     # 解析命令行参数
