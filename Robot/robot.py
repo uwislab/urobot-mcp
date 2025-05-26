@@ -82,16 +82,12 @@ class Robot:
         # 在底部显示信息
         font = pygame.font.SysFont('simhei', 20)
         # 显示服务器信息
-        info_text = f"服务器: localhost:8080"
+        info_text = f"localhost:8080"
         text_surface = font.render(info_text, True, BLACK)
         text_rect = text_surface.get_rect(center=(WIDTH//2, HEIGHT - 50))
         screen.blit(text_surface, text_rect)
         
-        # 显示当前选中的机器人
-        select_text = f"当前控制: 机器人 {self.id+1} (按1-9切换)"
-        select_surface = font.render(select_text, True, RED if self.id == robot_manager.selected_robot else BLACK)
-        select_rect = select_surface.get_rect(center=(WIDTH//2, HEIGHT - 30))
-        screen.blit(select_surface, select_rect)
+
         
         # 显示最后接收到的命令
         if hasattr(self, 'last_command'):
