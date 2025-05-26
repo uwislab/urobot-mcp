@@ -142,12 +142,19 @@ class RobotRemoteControl(cmd.Cmd):
     def _send_c_command(self, c_code):
         """发送C命令到机器人服务器"""
         try:
-            url = f"{self.base_url}/execute_c_program"
-            data = {
-                "robot_id": self.robot_id,
-                "program": c_code
-            }
-            response = requests.post(url, json=data)
+            # 实时运动命令直接发送到/robot.html接口
+            if c_code.strip() in ['forward', 'back', 'left', 'right', 'stop']:
+                url = f"{self.base_url}/robot.html?cmd={c_code}&id={self.robot_id}"
+                response = requests.get(url)
+            else:
+                # 复杂C代码仍走原接口
+                url = f"{self.base_url}/execute_c_program" 
+                data = {
+                    "robot_id": self.robot_id,
+                    "program": c_code
+                }
+                response = requests.post(url, json=data)
+                
             if response.status_code == 200:
                 print("命令执行成功")
                 return True

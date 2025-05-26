@@ -329,15 +329,22 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 try:
                     robot = self.robot_manager.get_robot(robot_id)
                     if cmd == 'forward':
-                        robot.forward(4, 1)  # speed 4, distance 1
+                        robot.keys_pressed['up'] = True
+                        robot.keys_pressed['down'] = False
                     elif cmd == 'back':
-                        robot.back(4, 1)
+                        robot.keys_pressed['down'] = True 
+                        robot.keys_pressed['up'] = False
                     elif cmd == 'left':
-                        robot.turn_left(90)
+                        robot.keys_pressed['left'] = True
+                        robot.keys_pressed['right'] = False
                     elif cmd == 'right':
-                        robot.turn_right(90)
+                        robot.keys_pressed['right'] = True
+                        robot.keys_pressed['left'] = False
                     elif cmd == 'stop':
-                        robot.speed = 0
+                        robot.keys_pressed['up'] = False
+                        robot.keys_pressed['down'] = False
+                        robot.keys_pressed['left'] = False
+                        robot.keys_pressed['right'] = False
                     
                     self.send_response(200)
                     self.end_headers()
