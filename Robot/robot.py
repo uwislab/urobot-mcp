@@ -103,16 +103,32 @@ class Robot:
         # 创建旋转后的表面
         robot_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         
-        # 绘制车身
-        pygame.draw.rect(robot_surface, (0, 128, 255), (10, 0, 20, 40))  # 浅蓝色主体
-        pygame.draw.rect(robot_surface, BLACK, (10, 0, 20, 40), 2)  # 黑色边框
+        # 绘制车身 - 更美观的小车设计
+        # 车体主体
+        pygame.draw.rect(robot_surface, (30, 144, 255), (5, 10, 30, 25))  # 更深的蓝色
+        # 车顶
+        pygame.draw.polygon(robot_surface, (30, 144, 255), 
+                          [(10, 10), (30, 10), (25, 0), (15, 0)])
+        # 车窗
+        pygame.draw.rect(robot_surface, (173, 216, 230), (10, 15, 20, 10))
         
-        # 绘制轮子
-        pygame.draw.circle(robot_surface, BLACK, (15, 50), 8)
-        pygame.draw.circle(robot_surface, BLACK, (25, 50), 8)
+        # 绘制轮子 - 更立体的设计
+        pygame.draw.circle(robot_surface, (50, 50, 50), (10, 45), 8)  # 左轮
+        pygame.draw.circle(robot_surface, (50, 50, 50), (30, 45), 8)  # 右轮
+        pygame.draw.circle(robot_surface, (100, 100, 100), (10, 45), 5)  # 轮毂
+        pygame.draw.circle(robot_surface, (100, 100, 100), (30, 45), 5)
         
-        # 绘制前灯
-        pygame.draw.circle(robot_surface, YELLOW, (20, 5), 3)
+        # 绘制前灯 - 更精致的设计
+        pygame.draw.ellipse(robot_surface, YELLOW, (5, 20, 5, 3))  # 左前灯
+        pygame.draw.ellipse(robot_surface, YELLOW, (30, 20, 5, 3))  # 右前灯
+        
+        # 添加车尾灯
+        pygame.draw.ellipse(robot_surface, RED, (5, 30, 5, 3))  # 左尾灯
+        pygame.draw.ellipse(robot_surface, RED, (30, 30, 5, 3))  # 右尾灯
+        
+        # 添加车身装饰线
+        pygame.draw.line(robot_surface, WHITE, (10, 15), (30, 15), 1)  # 车窗下沿
+        pygame.draw.line(robot_surface, WHITE, (20, 10), (20, 35), 1)  # 车身中线
         
         # 旋转表面
         rotated_surface = pygame.transform.rotate(robot_surface, self.angle)
