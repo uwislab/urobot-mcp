@@ -39,7 +39,7 @@ class RobotRemoteControl(cmd.Cmd):
             print("用法: forward <速度(1-8)> <距离>")
             return
         speed, distance = args
-        c_code = f'forward({speed}, {distance});'
+        c_code = f'void move_forward() {{\n    forward({speed}, {distance});\n}}\nmove_forward();'
         self._send_c_command(c_code)
     
     def do_back(self, arg):
@@ -49,7 +49,7 @@ class RobotRemoteControl(cmd.Cmd):
             print("用法: back <速度(1-8)> <距离>")
             return
         speed, distance = args
-        c_code = f'back({speed}, {distance});'
+        c_code = f'void move_back() {{\n    back({speed}, {distance});\n}}\nmove_back();'
         self._send_c_command(c_code)
     
     def do_left(self, arg):
@@ -57,7 +57,7 @@ class RobotRemoteControl(cmd.Cmd):
         if not arg:
             print("用法: left <角度>")
             return
-        c_code = f'turn_left({arg});'
+        c_code = f'void turn_left_deg() {{\n    turn_left({arg});\n}}\nturn_left_deg();'
         self._send_c_command(c_code)
     
     def do_right(self, arg):
@@ -65,7 +65,7 @@ class RobotRemoteControl(cmd.Cmd):
         if not arg:
             print("用法: right <角度>")
             return
-        c_code = f'turn_right({arg});'
+        c_code = f'void turn_right_deg() {{\n    turn_right({arg});\n}}\nturn_right_deg();'
         self._send_c_command(c_code)
     
     def do_say(self, arg):
@@ -111,23 +111,32 @@ class RobotRemoteControl(cmd.Cmd):
         # 预定义示例命令
         if arg == "square":
             c_code = """
-            for(int i=0; i<4; i++) {
-                forward(4, 3);
-                turn_right(90);
-            }
+void draw_square() {
+    for(int i=0; i<4; i++) {
+        forward(4, 3);
+        turn_right(90);
+    }
+}
+draw_square();
             """
         elif arg == "circle":
             c_code = """
-            for(int i=0; i<36; i++) {
-                forward(2, 1);
-                turn_right(10);
-            }
+void draw_circle() {
+    for(int i=0; i<36; i++) {
+        forward(2, 1);
+        turn_right(10);
+    }
+}
+draw_circle();
             """
         elif arg == "poem":
             c_code = """
-            gpp_say(1, "静夜思");
-            gpp_say(1, "作者李白");
-            gpp_say(1, "床前明月光，疑是地上霜。举头望明月，低头思故乡。");
+void recite_poem() {
+    gpp_say(1, "静夜思");
+    gpp_say(1, "作者李白"); 
+    gpp_say(1, "床前明月光，疑是地上霜。举头望明月，低头思故乡。");
+}
+recite_poem();
             """
         else:
             c_code = arg
@@ -142,18 +151,13 @@ class RobotRemoteControl(cmd.Cmd):
     def _send_c_command(self, c_code):
         """发送C命令到机器人服务器"""
         try:
-            # 实时运动命令直接发送到/robot.html接口
-            if c_code.strip() in ['forward', 'back', 'left', 'right', 'stop']:
-                url = f"{self.base_url}/robot.html?cmd={c_code}&id={self.robot_id}"
-                response = requests.get(url)
-            else:
-                # 复杂C代码仍走原接口
-                url = f"{self.base_url}/execute_c_program" 
-                data = {
-                    "robot_id": self.robot_id,
-                    "program": c_code
-                }
-                response = requests.post(url, json=data)
+            # 统一使用POST方式发送完整C程序
+            url = f"{self.base_url}/execute_c_program"
+            data = {
+                "robot_id": self.robot_id,
+                "program": f"void main() {{\n{c_code}\n}}"
+            }
+            response = requests.post(url, json=data)
                 
             if response.status_code == 200:
                 print("命令执行成功")
