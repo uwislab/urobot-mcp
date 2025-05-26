@@ -193,21 +193,13 @@ class Robot:
 
         # 检查是否碰撞墙壁
         if new_x < WALL_THICKNESS:
-            self.direction[0] *= -1
-            self.angle = 270 if self.angle == 90 else 90
             new_x = WALL_THICKNESS
         elif new_x + self.width > WIDTH - WALL_THICKNESS:
-            self.direction[0] *= -1
-            self.angle = 270 if self.angle == 90 else 90
             new_x = WIDTH - WALL_THICKNESS - self.width
             
         if new_y < WALL_THICKNESS:
-            self.direction[1] *= -1
-            self.angle = 0 if self.angle == 180 else 180
             new_y = WALL_THICKNESS
         elif new_y + self.height > HEIGHT - WALL_THICKNESS:
-            self.direction[1] *= -1
-            self.angle = 0 if self.angle == 180 else 180
             new_y = HEIGHT - WALL_THICKNESS - self.height
             
         self.x = new_x
@@ -216,17 +208,20 @@ class Robot:
     def forward(self, speed, distance):
         self.speed = min(8, max(1, speed)) / 2
         steps = distance * 10
+        self.keys_pressed['up'] = True
         for _ in range(steps):
             self._move()
-            pygame.time.wait(50)
+            pygame.time.delay(50)
+        self.keys_pressed['up'] = False
 
     def back(self, speed, distance):
         self.speed = min(8, max(1, speed)) / 2
         steps = distance * 10
+        self.keys_pressed['down'] = True
         for _ in range(steps):
-            self.x -= self.direction[0] * self.speed
-            self.y -= self.direction[1] * self.speed
-            pygame.time.wait(50)
+            self._move()
+            pygame.time.delay(50)
+        self.keys_pressed['down'] = False
 
     def turn_left(self, degrees):
         self.angle = (self.angle + degrees) % 360
@@ -347,22 +342,15 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 try:
                     robot = self.robot_manager.get_robot(robot_id)
                     if cmd == 'forward':
-                        robot.keys_pressed['up'] = True
-                        robot.keys_pressed['down'] = False
+                        robot.command_queue.append(('forward', (4, 1)))  # speed=4, distance=1
                     elif cmd == 'back':
-                        robot.keys_pressed['down'] = True 
-                        robot.keys_pressed['up'] = False
+                        robot.command_queue.append(('back', (4, 1)))
                     elif cmd == 'left':
-                        robot.keys_pressed['left'] = True
-                        robot.keys_pressed['right'] = False
+                        robot.command_queue.append(('turn_left', (90,)))
                     elif cmd == 'right':
-                        robot.keys_pressed['right'] = True
-                        robot.keys_pressed['left'] = False
+                        robot.command_queue.append(('turn_right', (90,)))
                     elif cmd == 'stop':
-                        robot.keys_pressed['up'] = False
-                        robot.keys_pressed['down'] = False
-                        robot.keys_pressed['left'] = False
-                        robot.keys_pressed['right'] = False
+                        robot.command_queue = []
                     
                     self.send_response(200)
                     self.end_headers()
