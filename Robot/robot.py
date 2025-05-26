@@ -524,12 +524,13 @@ def main():
     robot_id = robot_manager.add_robot(WIDTH//2 - 100, HEIGHT//2)
     robot_manager.add_robot(WIDTH//2 + 100, HEIGHT//2)
     
-    # 示例命令 - 可以删除或保留作为演示
+    # 示例命令
     robot = robot_manager.get_robot(robot_id)
     robot.command_queue.extend([
         ('forward', (4, 10)),
         ('turn_left', (90,)),
-        ('forward', (4, 10))
+        ('forward', (4, 10)),
+        ('turn_right', (90,))
     ])
     
     running = True
