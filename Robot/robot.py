@@ -432,11 +432,11 @@ class HTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     exec(increment)
         
 def start_http_server(robot_manager):
-    PORT = 8080  # 改用8080端口
+    PORT = 8080
     handler = lambda *args, **kwargs: HTTPRequestHandler(*args, robot_manager=robot_manager, **kwargs)
-    with socketserver.TCPServer(("", PORT), handler) as httpd:
-        print(f"Serving at port {PORT}")
-        httpd.serve_forever()
+    httpd = socketserver.TCPServer(("", PORT), handler)
+    print(f"Serving at port {PORT}")
+    httpd.serve_forever()
 
 # 主循环
 def execute_terminal_command(robot_manager, command):
@@ -444,7 +444,9 @@ def execute_terminal_command(robot_manager, command):
     if not command:
         return
         
-    parts = command.split()
+    # 处理带引号的参数
+    import shlex
+    parts = shlex.split(command)
     cmd = parts[0].lower()
     robot_id = 0  # 默认控制第一个机器人
     
