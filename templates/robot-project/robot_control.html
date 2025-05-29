@@ -164,7 +164,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>机器人仿真控制系统</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1><i class="fas fa-robot"></i> 机器人仿真控制系统</h1>
+            <button onclick="window.location.href='/'" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                           color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                           cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                <i class="fas fa-home"></i> 返回首页
+            </button>
+        </div>
         
         <div class="simulation-container">
             <!-- 机器人仿真区域 -->
@@ -228,6 +236,9 @@
             </div>
         </div>
     </div>
+    
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
         // 存储包装后的 C 函数
