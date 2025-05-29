@@ -38,6 +38,34 @@
             border: 1px solid #ccc;
             overflow: hidden;
         }
+        .boundary {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+        #boundary-top {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+        #boundary-bottom {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+        #boundary-left {
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+        #boundary-right {
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+        }
         
         #robot {
             position: absolute;
@@ -98,6 +126,10 @@
     
     <!-- 机器人仿真区域 -->
     <div id="robotSimulation">
+        <div class="boundary" id="boundary-top"></div>
+        <div class="boundary" id="boundary-bottom"></div>
+        <div class="boundary" id="boundary-left"></div>
+        <div class="boundary" id="boundary-right"></div>
         <div id="robot" data-rotation="0">
             <div id="robotDirection"></div>
         </div>
@@ -139,6 +171,46 @@
             document.getElementById('log').textContent = '机器人仿真系统已初始化\n';
         };
         
+        // 检查边界碰撞
+        function checkBoundaryCollision(robot) {
+            const sim = document.getElementById('robotSimulation');
+            const simRect = sim.getBoundingClientRect();
+            const robotRect = robot.getBoundingClientRect();
+            
+            // 边界检测
+            const hitLeft = robotRect.left <= simRect.left;
+            const hitRight = robotRect.right >= simRect.right;
+            const hitTop = robotRect.top <= simRect.top;
+            const hitBottom = robotRect.bottom >= simRect.bottom;
+            
+            return { hitLeft, hitRight, hitTop, hitBottom };
+        }
+
+        // 处理边界反弹
+        function handleBoundaryBounce(robot, hit) {
+            if (hit.hitLeft || hit.hitRight) {
+                // 水平反弹 - 反转X方向
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                robot.dataset.rotation = 180 - currentRot;
+                robot.style.transform = `rotate(${180 - currentRot}deg)`;
+                
+                // 记录碰撞
+                document.getElementById('log').textContent += 
+                    `机器人碰撞到${hit.hitLeft ? '左' : '右'}边界，方向已反转\n`;
+            }
+            
+            if (hit.hitTop || hit.hitBottom) {
+                // 垂直反弹 - 反转Y方向
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                robot.dataset.rotation = -currentRot;
+                robot.style.transform = `rotate(${-currentRot}deg)`;
+                
+                // 记录碰撞
+                document.getElementById('log').textContent += 
+                    `机器人碰撞到${hit.hitTop ? '上' : '下'}边界，方向已反转\n`;
+            }
+        }
+
         // 控制机器人
         function controlRobot(action) {
             if (!robotFunctions) {
@@ -150,6 +222,13 @@
                 const robot = document.getElementById('robot');
                 let command = '';
                 
+                // 先检查边界碰撞
+                const hit = checkBoundaryCollision(robot);
+                if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                    handleBoundaryBounce(robot, hit);
+                    return; // 碰撞后不执行原动作
+                }
+                
                 switch(action) {
                     case 'forward':
                         const forwardSpeed = parseInt(document.getElementById('forwardSpeed').value);
@@ -159,8 +238,18 @@
                         // 视觉反馈
                         const duration = forwardDistance / (forwardSpeed * 10);
                         const currentPos = parseInt(robot.style.left || '50');
+                        const newPos = currentPos + forwardDistance;
+                        
+                        // 检查是否会超出边界
+                        const simWidth = document.getElementById('robotSimulation').offsetWidth;
+                        if (newPos + robot.offsetWidth > simWidth) {
+                            robot.style.left = (simWidth - robot.offsetWidth - 5) + 'px';
+                            document.getElementById('log').textContent += 
+                                '前进距离已调整以避免超出右边界\n';
+                        } else {
+                            robot.style.left = newPos + 'px';
+                        }
                         robot.style.transition = `left ${duration}s linear`;
-                        robot.style.left = (currentPos + forwardDistance) + 'px';
                         
                         command = `    forward(${forwardSpeed}, ${forwardDistance});`;
                         break;
@@ -173,8 +262,17 @@
                         // 视觉反馈
                         const backDuration = backDistance / (backSpeed * 10);
                         const backCurrentPos = parseInt(robot.style.left || '50');
+                        const newBackPos = backCurrentPos - backDistance;
+                        
+                        // 检查是否会超出左边界
+                        if (newBackPos < 0) {
+                            robot.style.left = '5px';
+                            document.getElementById('log').textContent += 
+                                '后退距离已调整以避免超出左边界\n';
+                        } else {
+                            robot.style.left = newBackPos + 'px';
+                        }
                         robot.style.transition = `left ${backDuration}s linear`;
-                        robot.style.left = (backCurrentPos - backDistance) + 'px';
                         
                         command = `    back(${backSpeed}, ${backDistance});`;
                         break;
@@ -213,6 +311,15 @@
                     commandLog.appendChild(commandElement);
                     commandLog.scrollTop = commandLog.scrollHeight;
                 }
+
+                // 移动结束后检查边界
+                robot.addEventListener('transitionend', function onTransitionEnd() {
+                    const hit = checkBoundaryCollision(robot);
+                    if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                        handleBoundaryBounce(robot, hit);
+                    }
+                    robot.removeEventListener('transitionend', onTransitionEnd);
+                });
                 
             } catch (error) {
                 console.error('控制机器人时出错:', error);
