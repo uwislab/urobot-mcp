@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>机器人仿真系统</title>
-	 <script src="/static/js/picoc-js/dist/bundle.umd.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/picoc-js@latest/dist/bundle.umd.js" type="text/javascript"></script>
 
    
 </head>
@@ -20,16 +20,30 @@
 
 
 <script>
-const cprog = `
-#include <stdio.h>
-int main() {
-   // printf() displays the string inside quotation
-   printf("Hello, World!\n");
-   return 0;
-}
-`;
+// 确保picoc-js加载完成
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('页面加载完成，开始初始化picoc-js');
+    
+    const cprog = `
+    #include <stdio.h>
+    int main() {
+        // printf() displays the string inside quotation
+        printf("Hello, World!\\n");
+        return 0;
+    }
+    `;
 
-picocjs.runC(cprog, (output) => { console.log(output) });
+    try {
+        console.log('准备执行C程序:', cprog);
+        picocjs.runC(cprog, (output) => { 
+            console.log('C程序执行结果:', output);
+            alert('执行成功！查看控制台输出');
+        });
+    } catch (error) {
+        console.error('执行C程序出错:', error);
+        alert('执行出错: ' + error.message);
+    }
+});
 </script>
 </body>
 </html>
