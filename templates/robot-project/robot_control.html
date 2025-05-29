@@ -27,6 +27,53 @@
         button { padding: 10px 15px; margin: 5px; }
         input { padding: 10px; margin: 5px; width: 80px; }
         #output { margin-top: 20px; padding: 10px; background-color: #f5f5f5; min-height: 100px; }
+        
+        /* 机器人仿真区域样式 */
+        #robotSimulation {
+            position: relative;
+            width: 600px;
+            height: 300px;
+            margin: 20px auto;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            overflow: hidden;
+        }
+        
+        #robot {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #2a5298;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+            left: 50px;
+            top: 120px;
+        }
+        
+        #robotDirection {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+            right: 5px;
+            top: 25px;
+        }
+        
+        /* 控制台样式 */
+        #console {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .command {
+            color: #569cd6;
+        }
     </style>
 </head>
 <body>
@@ -49,9 +96,23 @@
         <button onclick="controlRobot('right')">右转</button>
     </div>
     
+    <!-- 机器人仿真区域 -->
+    <div id="robotSimulation">
+        <div id="robot" data-rotation="0">
+            <div id="robotDirection"></div>
+        </div>
+    </div>
+    
     <div id="output">
         <h3>控制台输出</h3>
         <pre id="log"></pre>
+        <h3>C语言命令</h3>
+        <div id="console">
+            <div>// 机器人控制命令记录</div>
+            <div>void setup() {</div>
+            <div id="commandLog"></div>
+            <div>}</div>
+        </div>
     </div>
 
     <script>
@@ -86,29 +147,73 @@
             }
             
             try {
+                const robot = document.getElementById('robot');
+                let command = '';
+                
                 switch(action) {
                     case 'forward':
                         const forwardSpeed = parseInt(document.getElementById('forwardSpeed').value);
                         const forwardDistance = parseInt(document.getElementById('forwardDistance').value);
                         robotFunctions.forward(forwardSpeed, forwardDistance);
+                        
+                        // 视觉反馈
+                        const duration = forwardDistance / (forwardSpeed * 10);
+                        const currentPos = parseInt(robot.style.left || '50');
+                        robot.style.transition = `left ${duration}s linear`;
+                        robot.style.left = (currentPos + forwardDistance) + 'px';
+                        
+                        command = `    forward(${forwardSpeed}, ${forwardDistance});`;
                         break;
                         
                     case 'back':
                         const backSpeed = parseInt(document.getElementById('backSpeed').value);
                         const backDistance = parseInt(document.getElementById('backDistance').value);
                         robotFunctions.back(backSpeed, backDistance);
+                        
+                        // 视觉反馈
+                        const backDuration = backDistance / (backSpeed * 10);
+                        const backCurrentPos = parseInt(robot.style.left || '50');
+                        robot.style.transition = `left ${backDuration}s linear`;
+                        robot.style.left = (backCurrentPos - backDistance) + 'px';
+                        
+                        command = `    back(${backSpeed}, ${backDistance});`;
                         break;
                         
                     case 'left':
                         const leftDegree = parseInt(document.getElementById('turnDegree').value);
                         robotFunctions.turn_left(leftDegree);
+                        
+                        // 视觉反馈
+                        const currentRot = parseInt(robot.dataset.rotation || '0');
+                        robot.style.transform = `rotate(${currentRot - leftDegree}deg)`;
+                        robot.dataset.rotation = currentRot - leftDegree;
+                        
+                        command = `    turn_left(${leftDegree});`;
                         break;
                         
                     case 'right':
                         const rightDegree = parseInt(document.getElementById('turnDegree').value);
                         robotFunctions.turn_right(rightDegree);
+                        
+                        // 视觉反馈
+                        const rightCurrentRot = parseInt(robot.dataset.rotation || '0');
+                        robot.style.transform = `rotate(${rightCurrentRot + rightDegree}deg)`;
+                        robot.dataset.rotation = rightCurrentRot + rightDegree;
+                        
+                        command = `    turn_right(${rightDegree});`;
                         break;
                 }
+                
+                // 记录C语言命令
+                if (command) {
+                    const commandLog = document.getElementById('commandLog');
+                    const commandElement = document.createElement('div');
+                    commandElement.className = 'command';
+                    commandElement.textContent = command;
+                    commandLog.appendChild(commandElement);
+                    commandLog.scrollTop = commandLog.scrollHeight;
+                }
+                
             } catch (error) {
                 console.error('控制机器人时出错:', error);
                 document.getElementById('log').textContent += `错误: ${error.message}\n`;
