@@ -198,6 +198,16 @@ def run_script4():
             'error': str(e),
             'result': ''
         }), 500
+
+@app.route('/test3/test')
+def robot_simulation():
+    """
+    机器人仿真测试页面
+    Returns:
+        HTML: 渲染后的test.html模板
+    """
+    logger.info("访问机器人仿真测试页面")
+    return render_template('test3/test.html')
 # 主程序入口
 if __name__ == '__main__':
     # 开发环境配置，仅本地访问
