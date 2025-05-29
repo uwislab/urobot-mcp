@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器人仿真控制系统</title>
+    <script src="robot_control.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .controls { margin: 20px 0; }
+        button { padding: 10px 15px; margin: 5px; }
+        input { padding: 10px; margin: 5px; width: 80px; }
+        #output { margin-top: 20px; padding: 10px; background-color: #f5f5f5; min-height: 100px; }
+    </style>
+</head>
+<body>
+    <h1>机器人仿真控制系统</h1>
+    
+    <div class="controls">
+        <h3>前进控制</h3>
+        速度: <input type="number" id="forwardSpeed" min="1" max="8" value="4">
+        距离: <input type="number" id="forwardDistance" min="1" max="200" value="50">
+        <button onclick="controlRobot('forward')">前进</button>
+        
+        <h3>后退控制</h3>
+        速度: <input type="number" id="backSpeed" min="1" max="8" value="4">
+        距离: <input type="number" id="backDistance" min="1" max="200" value="50">
+        <button onclick="controlRobot('back')">后退</button>
+        
+        <h3>转向控制</h3>
+        角度: <input type="number" id="turnDegree" min="1" max="360" value="90">
+        <button onclick="controlRobot('left')">左转</button>
+        <button onclick="controlRobot('right')">右转</button>
+    </div>
+    
+    <div id="output">
+        <h3>控制台输出</h3>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        // 存储包装后的 C 函数
+        let robotFunctions = null;
+        
+        // 捕获 printf 输出并显示在页面上
+        const originalPrint = Module.print;
+        Module.print = function(text) {
+            originalPrint(text);
+            const logElement = document.getElementById('log');
+            logElement.textContent += text + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        };
+        
+        // 初始化机器人控制函数
+        Module.onRuntimeInitialized = () => {
+            robotFunctions = {
+                forward: Module.cwrap('forward', null, ['number', 'number']),
+                back: Module.cwrap('back', null, ['number', 'number']),
+                turn_left: Module.cwrap('turn_left', null, ['number']),
+                turn_right: Module.cwrap('turn_right', null, ['number'])
+            };
+            document.getElementById('log').textContent = '机器人仿真系统已初始化\n';
+        };
+        
+        // 控制机器人
+        function controlRobot(action) {
+            if (!robotFunctions) {
+                alert('机器人模块尚未初始化完成');
+                return;
+            }
+            
+            try {
+                switch(action) {
+                    case 'forward':
+                        const forwardSpeed = parseInt(document.getElementById('forwardSpeed').value);
+                        const forwardDistance = parseInt(document.getElementById('forwardDistance').value);
+                        robotFunctions.forward(forwardSpeed, forwardDistance);
+                        break;
+                        
+                    case 'back':
+                        const backSpeed = parseInt(document.getElementById('backSpeed').value);
+                        const backDistance = parseInt(document.getElementById('backDistance').value);
+                        robotFunctions.back(backSpeed, backDistance);
+                        break;
+                        
+                    case 'left':
+                        const leftDegree = parseInt(document.getElementById('turnDegree').value);
+                        robotFunctions.turn_left(leftDegree);
+                        break;
+                        
+                    case 'right':
+                        const rightDegree = parseInt(document.getElementById('turnDegree').value);
+                        robotFunctions.turn_right(rightDegree);
+                        break;
+                }
+            } catch (error) {
+                console.error('控制机器人时出错:', error);
+                document.getElementById('log').textContent += `错误: ${error.message}\n`;
+            }
+        }
+    </script>
+</body>
+</html>
