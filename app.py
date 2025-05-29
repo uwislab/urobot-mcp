@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # 初始化Flask应用
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 # 定义API响应类型
 ApiResponse = Dict[str, Union[str, Dict[str, str]]]

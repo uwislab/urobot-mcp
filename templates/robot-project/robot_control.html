@@ -4,7 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>机器人仿真控制系统</title>
-    <script src="robot_control.js"></script>
+    <script>
+    var Module = {
+      wasmBinaryFile: '/static/js/robot-project/robot_control.wasm',
+      print: function(text) {
+        const logElement = document.getElementById('log');
+        logElement.textContent += text + '\n';
+        logElement.scrollTop = logElement.scrollHeight;
+      },
+      printErr: function(text) {
+        console.error(text);
+        const logElement = document.getElementById('log');
+        logElement.textContent += '错误: ' + text + '\n';
+        logElement.scrollTop = logElement.scrollHeight;
+      }
+    };
+    </script>
+    <script src="/static/js/robot-project/robot_control.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         .controls { margin: 20px 0; }
