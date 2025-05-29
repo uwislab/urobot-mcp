@@ -208,6 +208,16 @@ def robot_simulation():
     """
     logger.info("访问机器人仿真测试页面")
     return render_template('test3/test.html')
+
+@app.route('/robot-project/control')
+def robot_control():
+    """
+    机器人控制台页面
+    Returns:
+        HTML: 渲染后的robot_control.html模板
+    """
+    logger.info("访问机器人控制台页面")
+    return render_template('robot-project/robot_control.html')
 # 主程序入口
 if __name__ == '__main__':
     # 开发环境配置，仅本地访问
