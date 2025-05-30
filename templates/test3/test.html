@@ -4,168 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>机器人仿真系统</title>
-    <script src="/static/js/picoc-js/bundle.umd.js" type="text/javascript"></script>
-    <style>
-        #robot-container {
-            position: relative;
-            height: 300px;
-            border: 1px solid #ccc;
-            margin: 20px;
-            background: #f5f5f5;
-        }
-        #robot {
-            position: absolute;
-            left: 50px;
-            top: 100px;
-            width: 60px;
-            height: 60px;
-            background-color: #2a5298;
-            border-radius: 10px;
-            transition: all 0.5s ease;
-        }
-        #robot-direction {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: red;
-            right: 5px;
-            top: 25px;
-            border-radius: 50%;
-        }
-        #output-panel {
-            padding: 20px;
-            margin: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-    </style>
+    <script src="/static/js/picoc-js/dist/bundle.umd.js" type="text/javascript"></script>
 </head>
 <body class="font-inter bg-light min-h-screen flex flex-col">
-    <div style="padding: 20px;">
-        <button onclick="window.location.href='/'" 
-                style="padding: 10px 20px; background: #2a5298; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            返回首页
-        </button>
-    </div>
 
-    <div id="robot-container">
-        <div id="robot" data-rotation="0">
-            <div id="robot-direction"></div>
-        </div>
-    </div>
 
 
 <script>
-// 确保picoc-js加载完成
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('页面加载完成，开始初始化picoc-js');
-    
-    // 检查picoc是否加载成功
-    if (typeof picoc === 'undefined') {
-        console.error('picoc-js未正确加载');
-        alert('picoc-js库加载失败，请刷新页面重试');
+
+// 定义要执行的 C 程序，添加机器人控制函数的声明与实现
+const cprog = `
+#include <stdio.h>
+
+// 函数声明与实现
+void forward(int speed, int destance) {
+    if (speed < 1 || speed > 8) {
+        printf("速度参数超出范围 [1-8]。\n");
         return;
     }
-
-    // 初始化picoc并添加机器人控制函数
-    const picoc = new PicoC();
-    picoc.registerFunctions({
-        functions: {
-            // 前进控制函数
-            'forward': function(speed, distance) {
-                console.log(`调用forward函数: speed=${speed}, distance=${distance}`);
-                
-                // 参数验证
-                if(speed < 1 || speed > 8) {
-                    throw new Error('速度参数必须在1-8之间');
-                }
-                if(distance < 1 || distance > 200) {
-                    throw new Error('距离参数必须在1-200之间');
-                }
-                
-                // 模拟机器人前进效果
-                const duration = distance / (speed * 5); // 计算运动时间
-                const robot = document.getElementById('robot');
-                if(robot) {
-                    // 动画效果
-                    robot.style.transition = `left ${duration}s linear`;
-                    const currentPos = parseInt(robot.style.left || '50');
-                    robot.style.left = (currentPos + distance) + 'px';
-                }
-                
-                // 返回执行结果
-                return `机器人前进: 速度档位${speed}, 距离${distance}单位`;
-            },
-            
-            // 可以添加更多机器人控制函数...
-            'beep': function(freq, duration) {
-                console.log(`蜂鸣器: freq=${freq}, duration=${duration}`);
-                // 实际实现可以调用Web Audio API
-                return `蜂鸣器发声: ${freq}Hz, ${duration}ms`;
-            },
-            
-            'turn_left': function(degrees) {
-                console.log(`左转: ${degrees}度`);
-                const robot = document.getElementById('robot');
-                if(robot) {
-                    const currentRot = parseInt(robot.dataset.rotation || '0');
-                    robot.style.transform = `rotate(${currentRot - degrees}deg)`;
-                    robot.dataset.rotation = currentRot - degrees;
-                }
-                return `机器人左转${degrees}度`;
-            }
-        }
-    });
-
-    // 示例机器人控制程序
-    const robotProg = `
-    #include <stdio.h>
-    
-    // 声明机器人控制函数
-    extern void forward(int speed, int distance);
-    extern void beep(int freq, int duration);
-    extern void turn_left(int degrees);
-    
-    void demo_movement() {
-        printf("开始机器人运动演示\\n");
-        
-        forward(4, 50);  // 中速前进50单位
-        beep(1000, 200); // 发出1kHz声音200ms
-        turn_left(90);   // 左转90度
-        forward(6, 30);  // 快速前进30单位
+    if (destance < 1 || destance > 200) {
+        printf("距离参数超出范围 [1-200]。\n");
+        return;
     }
-    
-    int main() {
-        demo_movement();
-        return 0;
-    }
-    `;
+    printf("机器人以速度 %d 前进 %d 距离。\n", speed, destance);
+}
 
-    try {
-        console.log('准备执行机器人控制程序:', robotProg);
-        picoc.run(robotProg, (output) => { 
-            console.log('程序执行结果:', output);
-            // 在页面上显示输出和状态
-            document.body.innerHTML += `
-            <div id="output-panel">
-                <h3 style="color:#2a5298;">程序输出:</h3>
-                <pre style="background:#fff; padding:10px; border-radius:3px;">${output}</pre>
-                <div id="robot-status" style="margin-top:10px; padding:10px; 
-                    background:#e8f4f8; border-left:4px solid #2a5298;">
-                    机器人状态: 指令执行完成
-                </div>
-            </div>
-            `;
-        });
-    } catch (error) {
-        console.error('执行C程序出错:', error);
-        document.body.innerHTML += `
-        <div style="padding:20px; background:#ffebee; margin:10px; color:red;">
-            <h3>执行错误:</h3>
-            <pre>${error.message}</pre>
-        </div>`;
+void back(int speed, int destance) {
+    if (speed < 1 || speed > 8) {
+        printf("速度参数超出范围 [1-8]。\n");
+        return;
     }
-});
+    if (destance < 1 || destance > 200) {
+        printf("距离参数超出范围 [1-200]。\n");
+        return;
+    }
+    printf("机器人以速度 %d 后退 %d 距离。\n", speed, destance);
+}
+
+void turn_left(int degree) {
+    printf("机器人左转 %d 度。\n", degree);
+}
+
+void turn_right(int degree) {
+    printf("机器人右转 %d 度。\n", degree);
+}
+
+int main() {
+    // 调用 forward 函数，设置前进速度为 4，前进距离为 50
+    forward(4, 50);
+
+    // 调用 turn_left 函数，左转 90 度
+    turn_left(90);
+
+    // 调用 forward 函数，设置前进速度为 4，前进距离为 30
+    forward(4, 30);
+
+    // 调用 turn_right 函数，右转 45 度
+    turn_right(45);
+
+    // 调用 back 函数，设置后退速度为 4，后退距离为 20
+    back(4, 20);
+
+    return 0;
+}
+`;
+
+// 执行 C 程序并处理输出
+picocjs.runC(cprog, (output) => { console.log(output) });
+
 </script>
 </body>
 </html>
