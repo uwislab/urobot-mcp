@@ -83,6 +83,10 @@
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
             <!-- 机器人仿真区域 -->
             <div class="simulation-panel">
+                <div id="positionDisplay" style="background: rgba(255,255,255,0.8); padding: 10px; border-radius: 8px; margin-bottom: 10px; font-family: monospace;">
+                    坐标: <span id="robotX">50</span>px, <span id="robotY">120</span>px | 
+                    角度: <span id="robotAngle">0</span>°
+                </div>
                 <div id="robotSimulation">
                     <div class="boundary" id="boundary-top"></div>
                     <div class="boundary" id="boundary-bottom"></div>
@@ -266,6 +270,11 @@ int main() {
                     const newRot = (currentRot - leftDegree) % 360;
                     robot.style.transform = `rotate(${newRot}deg)`;
                     robot.dataset.rotation = newRot;
+                    updatePositionDisplay(
+                        parseFloat(robot.style.left || '50'),
+                        parseFloat(robot.style.top || '120'),
+                        newRot
+                    );
                     break;
 
                 case 'right':
@@ -276,6 +285,11 @@ int main() {
                     const rightNewRot = (rightCurrentRot + rightDegree) % 360;
                     robot.style.transform = `rotate(${rightNewRot}deg)`;
                     robot.dataset.rotation = rightNewRot;
+                    updatePositionDisplay(
+                        parseFloat(robot.style.left || '50'),
+                        parseFloat(robot.style.top || '120'),
+                        rightNewRot
+                    );
                     break;
             }
 
@@ -347,6 +361,13 @@ int main() {
             }
         }
 
+        // 更新坐标显示
+        function updatePositionDisplay(x, y, angle) {
+            document.getElementById('robotX').textContent = Math.round(x);
+            document.getElementById('robotY').textContent = Math.round(y);
+            document.getElementById('robotAngle').textContent = Math.round(angle);
+        }
+
         // 根据旋转角度计算并移动机器人
         function moveRobotWithRotation(robot, distance, speed) {
             // 获取当前位置和旋转角度
@@ -385,6 +406,9 @@ int main() {
             robot.style.transition = `left ${duration}s linear, top ${duration}s linear`;
             robot.style.left = newLeft + 'px';
             robot.style.top = newTop + 'px';
+            
+            // 更新坐标显示
+            updatePositionDisplay(newLeft, newTop, rotation);
 
             // 记录移动信息
             document.getElementById('log').textContent +=
