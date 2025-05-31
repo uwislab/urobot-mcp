@@ -317,6 +317,129 @@
     </div>
 
     <script>
+        // 键盘控制状态
+        const keyState = {
+            up: false,
+            down: false,
+            left: false,
+            right: false
+        };
+
+        // 键盘事件监听
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                    keyState.up = true;
+                    break;
+                case 'ArrowDown':
+                    keyState.down = true;
+                    break;
+                case 'ArrowLeft':
+                    keyState.left = true;
+                    break;
+                case 'ArrowRight':
+                    keyState.right = true;
+                    break;
+            }
+            e.preventDefault(); // 防止页面滚动
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                    keyState.up = false;
+                    break;
+                case 'ArrowDown':
+                    keyState.down = false;
+                    break;
+                case 'ArrowLeft':
+                    keyState.left = false;
+                    break;
+                case 'ArrowRight':
+                    keyState.right = false;
+                    break;
+            }
+        });
+
+        // 键盘控制循环
+        function keyboardControlLoop() {
+            const robot = document.getElementById('robot');
+            const speed = 2; // 移动速度
+            const rotationSpeed = 2; // 旋转速度(度/帧)
+            
+            // 处理旋转
+            if (keyState.left) {
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                const newRot = (currentRot - rotationSpeed) % 360;
+                robot.style.transform = `rotate(${newRot}deg)`;
+                robot.dataset.rotation = newRot;
+            }
+            if (keyState.right) {
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                const newRot = (currentRot + rotationSpeed) % 360;
+                robot.style.transform = `rotate(${newRot}deg)`;
+                robot.dataset.rotation = newRot;
+            }
+
+            // 处理移动
+            if (keyState.up || keyState.down) {
+                const currentLeft = parseFloat(robot.style.left || '50');
+                const currentTop = parseFloat(robot.style.top || '120');
+                const rotation = parseFloat(robot.dataset.rotation || '0');
+                const radians = rotation * Math.PI / 180;
+                
+                // 计算移动方向 (前进或后退)
+                const direction = keyState.up ? 1 : -1;
+                const deltaX = Math.cos(radians) * speed * direction;
+                const deltaY = Math.sin(radians) * speed * direction;
+
+                // 计算新位置
+                let newLeft = currentLeft + deltaX;
+                let newTop = currentTop + deltaY;
+
+                // 边界检查
+                const sim = document.getElementById('robotSimulation');
+                const robotWidth = robot.offsetWidth;
+                const robotHeight = robot.offsetHeight;
+                
+                if (newLeft < 0) newLeft = 0;
+                if (newLeft > sim.offsetWidth - robotWidth) newLeft = sim.offsetWidth - robotWidth;
+                if (newTop < 0) newTop = 0;
+                if (newTop > sim.offsetHeight - robotHeight) newTop = sim.offsetHeight - robotHeight;
+
+                // 应用新位置 (无过渡动画)
+                robot.style.transition = 'none';
+                robot.style.left = newLeft + 'px';
+                robot.style.top = newTop + 'px';
+
+                // 更新坐标显示
+                updatePositionDisplay(newLeft, newTop, rotation);
+            }
+
+            // 检查碰撞
+            const hit = checkCollision(robot);
+            if (hit.hitObstacle) {
+                // 碰到障碍物时回退一步
+                const currentLeft = parseFloat(robot.style.left || '50');
+                const currentTop = parseFloat(robot.style.top || '120');
+                const rotation = parseFloat(robot.dataset.rotation || '0');
+                const radians = rotation * Math.PI / 180;
+                
+                // 回退方向 (与移动方向相反)
+                const direction = keyState.up ? -1 : 1;
+                const deltaX = Math.cos(radians) * speed * direction;
+                const deltaY = Math.sin(radians) * speed * direction;
+
+                robot.style.left = (currentLeft + deltaX) + 'px';
+                robot.style.top = (currentTop + deltaY) + 'px';
+            }
+
+            requestAnimationFrame(keyboardControlLoop);
+        }
+
+        // 启动键盘控制循环
+        keyboardControlLoop();
+
         // 生成C代码模板
         function generateCCode(action, params) {
             let code = `#include <stdio.h>
