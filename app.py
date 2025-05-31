@@ -199,7 +199,7 @@ def run_script4():
             'result': ''
         }), 500
 
-@app.route('/test3/test')
+@app.route('/robot')
 def robot_simulation():
     """
     机器人仿真测试页面
@@ -207,7 +207,7 @@ def robot_simulation():
         HTML: 渲染后的test.html模板
     """
     logger.info("访问机器人仿真测试页面")
-    return render_template('test3/test.html')
+    return render_template('robot/robot.html')
 
 @app.route('/robot-project/control')
 def robot_control():
