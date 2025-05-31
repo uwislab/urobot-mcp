@@ -125,39 +125,39 @@
             <div class="control-panel">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
-                        <div class="control-group">
-                            <h3>前进控制</h3>
-                            <div>速度: <input type="number" id="forwardSpeed" min="1" max="8" value="4"></div>
-                            <div>距离: <input type="number" id="forwardDistance" min="1" max="200" value="50"></div>
-                            <button onclick="executeCommand('forward')">前进</button>
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">前进控制</h3>
+                            <div>速度: <input type="number" id="forwardSpeed" min="1" max="8" value="4" style="font-size: 1.1rem;"></div>
+                            <div>距离: <input type="number" id="forwardDistance" min="1" max="200" value="50" style="font-size: 1.1rem;"></div>
+                            <button onclick="executeCommand('forward')" style="font-size: 1.1rem;">前进</button>
                         </div>
 
-                        <div class="control-group">
-                            <h3>后退控制</h3>
-                            <div>速度: <input type="number" id="backSpeed" min="1" max="8" value="4"></div>
-                            <div>距离: <input type="number" id="backDistance" min="1" max="200" value="50"></div>
-                            <button onclick="executeCommand('back')">后退</button>
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">后退控制</h3>
+                            <div>速度: <input type="number" id="backSpeed" min="1" max="8" value="4" style="font-size: 1.1rem;"></div>
+                            <div>距离: <input type="number" id="backDistance" min="1" max="200" value="50" style="font-size: 1.1rem;"></div>
+                            <button onclick="executeCommand('back')" style="font-size: 1.1rem;">后退</button>
                         </div>
 
-                        <div class="control-group">
-                            <h3>转向控制</h3>
-                            <div>角度: <input type="number" id="turnDegree" min="1" max="360" value="90"></div>
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">转向控制</h3>
+                            <div>角度: <input type="number" id="turnDegree" min="1" max="360" value="90" style="font-size: 1.1rem;"></div>
                             <div>
-                                <button onclick="executeCommand('left')">左转</button>
-                                <button onclick="executeCommand('right')">右转</button>
+                                <button onclick="executeCommand('left')" style="font-size: 1.1rem;">左转</button>
+                                <button onclick="executeCommand('right')" style="font-size: 1.1rem;">右转</button>
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <div class="control-group">
-                            <h3>控制台输出</h3>
-                            <pre id="log" style="background: #f5f5f5; padding: 10px; border-radius: 5px; height: 200px; overflow: auto;"></pre>
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">控制台输出</h3>
+                            <pre id="log" style="background: #f5f5f5; padding: 10px; border-radius: 5px; height: 200px; overflow: auto; font-size: 1.1rem;"></pre>
                         </div>
 
-                        <div class="control-group">
-                            <h3>C语言命令</h3>
-                            <div id="console" style="background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 5px; height: 200px; overflow: auto;">
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">C语言命令</h3>
+                            <div id="console" style="background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 5px; height: 200px; overflow: auto; font-size: 1.1rem;">
                                 <div>// 机器人控制命令记录</div>
                                 <div>void main() {</div>
                                 <div id="commandLog"></div>
