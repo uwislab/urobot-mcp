@@ -50,7 +50,7 @@
                     <div class="boundary" id="boundary-bottom"></div>
                     <div class="boundary" id="boundary-left"></div>
                     <div class="boundary" id="boundary-right"></div>
-                    <div id="robot" data-rotation="0">
+                    <div id="robot" data-rotation="0" style="left: 50px; top: 120px;">
                         <div id="robotDirection"></div>
                     </div>
                 </div>
@@ -214,17 +214,97 @@ int main() {
             }
         }
 
-        // 保持与robot_control.html相同的机器人移动和边界检测函数
-        function moveRobotWithRotation(robot, distance, speed) {
-            // 实现与robot_control.html相同的移动逻辑...
-        }
-
+        // 检查边界碰撞
         function checkBoundaryCollision(robot) {
-            // 实现与robot_control.html相同的边界检测逻辑...
+            const sim = document.getElementById('robotSimulation');
+            const simRect = sim.getBoundingClientRect();
+            const robotRect = robot.getBoundingClientRect();
+
+            // 边界检测
+            const hitLeft = robotRect.left <= simRect.left;
+            const hitRight = robotRect.right >= simRect.right;
+            const hitTop = robotRect.top <= simRect.top;
+            const hitBottom = robotRect.bottom >= simRect.bottom;
+
+            return { hitLeft, hitRight, hitTop, hitBottom };
         }
 
+        // 处理边界反弹
         function handleBoundaryBounce(robot, hit) {
-            // 实现与robot_control.html相同的边界反弹逻辑...
+            if (hit.hitLeft || hit.hitRight) {
+                // 水平反弹 - 反转X方向
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                robot.dataset.rotation = (180 - currentRot) % 360;
+                robot.style.transform = `rotate(${robot.dataset.rotation}deg)`;
+
+                // 记录碰撞
+                document.getElementById('log').textContent +=
+                    `机器人碰撞到${hit.hitLeft ? '左' : '右'}边界，方向已反转\n`;
+            }
+
+            if (hit.hitTop || hit.hitBottom) {
+                // 垂直反弹 - 反转Y方向
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                robot.dataset.rotation = (-currentRot) % 360;
+                robot.style.transform = `rotate(${robot.dataset.rotation}deg)`;
+
+                // 记录碰撞
+                document.getElementById('log').textContent +=
+                    `机器人碰撞到${hit.hitTop ? '上' : '下'}边界，方向已反转\n`;
+            }
+        }
+
+        // 根据旋转角度计算并移动机器人
+        function moveRobotWithRotation(robot, distance, speed) {
+            // 获取当前位置和旋转角度
+            const currentLeft = parseFloat(robot.style.left || '50');
+            const currentTop = parseFloat(robot.style.top || '120');
+            const rotation = parseFloat(robot.dataset.rotation || '0');
+
+            // 将角度转换为弧度
+            const radians = rotation * Math.PI / 180;
+
+            // 计算基于角度的X和Y方向的移动距离
+            const deltaX = Math.cos(radians) * distance;
+            const deltaY = Math.sin(radians) * distance;
+
+            // 计算新位置
+            let newLeft = currentLeft + deltaX;
+            let newTop = currentTop + deltaY;
+
+            // 获取仿真区域尺寸
+            const sim = document.getElementById('robotSimulation');
+            const simWidth = sim.offsetWidth;
+            const simHeight = sim.offsetHeight;
+            const robotWidth = robot.offsetWidth;
+            const robotHeight = robot.offsetHeight;
+
+            // 边界检查和调整
+            if (newLeft < 5) newLeft = 5;
+            if (newLeft + robotWidth > simWidth - 5) newLeft = simWidth - robotWidth - 5;
+            if (newTop < 5) newTop = 5;
+            if (newTop + robotHeight > simHeight - 5) newTop = simHeight - robotHeight - 5;
+
+            // 计算动画持续时间
+            const duration = Math.abs(distance) / (speed * 10);
+
+            // 设置过渡效果并应用新位置
+            robot.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+            robot.style.left = newLeft + 'px';
+            robot.style.top = newTop + 'px';
+
+            // 记录移动信息
+            document.getElementById('log').textContent +=
+                `机器人向${rotation}度方向移动了${distance > 0 ? '前' : '后'}${Math.abs(distance)}单位\n`;
+
+            // 移动结束后检查边界
+            robot.addEventListener('transitionend', function onTransitionEnd() {
+                const hit = checkBoundaryCollision(robot);
+                if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                    handleBoundaryBounce(robot, hit);
+                }
+                robot.removeEventListener('transitionend', onTransitionEnd);
+            });
         }
     </script>
 </body>
