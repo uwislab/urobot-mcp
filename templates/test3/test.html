@@ -613,7 +613,7 @@ int main() {
             }
         }
 
-        // 检查碰撞
+        // 精确碰撞检测 (返回碰撞信息)
         function checkCollision(robot) {
             const sim = document.getElementById('robotSimulation');
             const simRect = sim.getBoundingClientRect();
