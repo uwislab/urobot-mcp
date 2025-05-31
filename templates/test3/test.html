@@ -223,12 +223,19 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1><i class="fas fa-robot"></i> 机器人仿真控制系统 (C代码执行版)</h1>
             <div style="display: flex; gap: 10px;">
-                <button onclick="window.location.href='/'" 
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                <button onclick="switchMap('map1')"
+                        style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
                                color: white; padding: 12px 24px; border: none; border-radius: 12px;
                                cursor: pointer; font-weight: 600; transition: all 0.3s;
                                display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-home"></i> 返回首页
+                    <i class="fas fa-map"></i> 地图1
+                </button>
+                <button onclick="switchMap('map2')"
+                        style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                               color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                               cursor: pointer; font-weight: 600; transition: all 0.3s;
+                               display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-map-marked-alt"></i> 地图2
                 </button>
                 <button onclick="resetRobotPosition()"
                         style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
@@ -236,6 +243,13 @@
                                cursor: pointer; font-weight: 600; transition: all 0.3s;
                                display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-sync-alt"></i> 重置位置
+                </button>
+                <button onclick="window.location.href='/'" 
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                               color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                               cursor: pointer; font-weight: 600; transition: all 0.3s;
+                               display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-home"></i> 返回首页
                 </button>
             </div>
         </div>
@@ -263,10 +277,15 @@
                     <div class="boundary" id="boundary-left"></div>
                     <div class="boundary" id="boundary-right"></div>
                     <div id="robot" data-rotation="0" style="left: 50px; top: 120px; width: 120px; height: 120px; background-image: url('/static/robot.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; transition: all 0.5s ease; transform-origin: center;"></div>
-                    <!-- 添加障碍物 -->
-                    <div class="obstacle" style="left: 200px; top: 200px;"></div>
-                    <div class="obstacle" style="left: 400px; top: 300px;"></div>
-                    <div class="obstacle" style="left: 300px; top: 120px;"></div>
+                    <!-- 地图1障碍物 -->
+                    <div class="obstacle map1" style="left: 200px; top: 200px;"></div>
+                    <div class="obstacle map1" style="left: 400px; top: 300px;"></div>
+                    <div class="obstacle map1" style="left: 300px; top: 120px;"></div>
+                    <!-- 地图2障碍物 -->
+                    <div class="obstacle map2" style="left: 150px; top: 350px; display: none;"></div>
+                    <div class="obstacle map2" style="left: 500px; top: 150px; display: none;"></div>
+                    <div class="obstacle map2" style="left: 350px; top: 250px; display: none;"></div>
+                    <div class="obstacle map2" style="left: 250px; top: 50px; display: none;"></div>
                 </div>
             </div>
 
@@ -673,6 +692,56 @@ int main() {
                 document.getElementById('log').textContent +=
                     `机器人碰撞到${hit.hitTop ? '上' : '下'}边界，方向已反转\n`;
             }
+        }
+
+        // 地图配置
+        const mapConfigs = {
+            map1: {
+                startX: 50,
+                startY: 120,
+                obstacles: [
+                    {left: 200, top: 200},
+                    {left: 400, top: 300},
+                    {left: 300, top: 120}
+                ]
+            },
+            map2: {
+                startX: 100,
+                startY: 400,
+                obstacles: [
+                    {left: 150, top: 350},
+                    {left: 500, top: 150},
+                    {left: 350, top: 250},
+                    {left: 250, top: 50}
+                ]
+            }
+        };
+
+        // 切换地图
+        function switchMap(mapName) {
+            const config = mapConfigs[mapName];
+            
+            // 重置机器人位置
+            const robot = document.getElementById('robot');
+            robot.style.left = config.startX + 'px';
+            robot.style.top = config.startY + 'px';
+            robot.style.transform = 'rotate(0deg)';
+            robot.dataset.rotation = '0';
+            
+            // 更新坐标显示
+            updatePositionDisplay(config.startX, config.startY, 0);
+            
+            // 切换障碍物显示
+            document.querySelectorAll('.obstacle').forEach(ob => {
+                ob.style.display = 'none';
+            });
+            document.querySelectorAll('.obstacle.' + mapName).forEach(ob => {
+                ob.style.display = 'block';
+            });
+            
+            // 记录地图切换
+            document.getElementById('log').textContent +=
+                `已切换到${mapName === 'map1' ? '地图1' : '地图2'}\n`;
         }
 
         // 重置机器人位置
