@@ -167,6 +167,16 @@
             top: 120px;
             transform-origin: center;
         }
+
+        /* 障碍物样式 */
+        .obstacle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            border-radius: 3px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
         
         /* 控制台样式 */
         #console, #log {
@@ -243,6 +253,10 @@
                     <div class="boundary" id="boundary-left"></div>
                     <div class="boundary" id="boundary-right"></div>
                     <div id="robot" data-rotation="0" style="left: 50px; top: 120px; width: 120px; height: 120px; background-image: url('/static/robot.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; transition: all 0.5s ease; transform-origin: center;"></div>
+                    <!-- 添加障碍物 -->
+                    <div class="obstacle" style="left: 200px; top: 200px;"></div>
+                    <div class="obstacle" style="left: 400px; top: 300px;"></div>
+                    <div class="obstacle" style="left: 300px; top: 100px;"></div>
                 </div>
             </div>
 
@@ -469,8 +483,8 @@ int main() {
             }
         }
 
-        // 检查边界碰撞
-        function checkBoundaryCollision(robot) {
+        // 检查碰撞
+        function checkCollision(robot) {
             const sim = document.getElementById('robotSimulation');
             const simRect = sim.getBoundingClientRect();
             const robotRect = robot.getBoundingClientRect();
@@ -481,7 +495,25 @@ int main() {
             const hitTop = robotRect.top <= simRect.top;
             const hitBottom = robotRect.bottom >= simRect.bottom;
 
-            return { hitLeft, hitRight, hitTop, hitBottom };
+            // 障碍物检测
+            let hitObstacle = false;
+            const obstacles = document.querySelectorAll('.obstacle');
+            obstacles.forEach(obstacle => {
+                const obstacleRect = obstacle.getBoundingClientRect();
+                if (!(
+                    robotRect.right < obstacleRect.left || 
+                    robotRect.left > obstacleRect.right || 
+                    robotRect.bottom < obstacleRect.top || 
+                    robotRect.top > obstacleRect.bottom
+                )) {
+                    hitObstacle = true;
+                    // 记录碰撞
+                    document.getElementById('log').textContent +=
+                        `机器人碰撞到障碍物，已停止\n`;
+                }
+            });
+
+            return { hitLeft, hitRight, hitTop, hitBottom, hitObstacle };
         }
 
         // 处理边界反弹
@@ -562,12 +594,25 @@ int main() {
             document.getElementById('log').textContent +=
                 `机器人向${rotation}度方向移动了${distance > 0 ? '前' : '后'}${Math.abs(distance)}单位\n`;
 
-            // 移动结束后检查边界
-            robot.addEventListener('transitionend', function onTransitionEnd() {
-                const hit = checkBoundaryCollision(robot);
-                if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
-                    handleBoundaryBounce(robot, hit);
+            // 移动过程中持续检查碰撞
+            const checkInterval = setInterval(() => {
+                const hit = checkCollision(robot);
+                if (hit.hitObstacle || hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                    // 停止移动
+                    robot.style.transition = 'none';
+                    robot.style.left = robot.style.left;
+                    robot.style.top = robot.style.top;
+                    clearInterval(checkInterval);
+                    
+                    if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                        handleBoundaryBounce(robot, hit);
+                    }
                 }
+            }, 50);
+
+            // 移动结束后清除检查
+            robot.addEventListener('transitionend', function onTransitionEnd() {
+                clearInterval(checkInterval);
                 robot.removeEventListener('transitionend', onTransitionEnd);
             });
         }
