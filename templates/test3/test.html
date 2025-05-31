@@ -286,6 +286,13 @@
                                 <button onclick="executeCommand('right')" class="btn">右转</button>
                             </div>
                         </div>
+
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">重置控制</h3>
+                            <button onclick="resetRobotPosition()" class="btn" style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);">
+                                <i class="fas fa-sync-alt"></i> 重置位置
+                            </button>
+                        </div>
                     </div>
 
                     <div>
@@ -539,6 +546,21 @@ int main() {
                 document.getElementById('log').textContent +=
                     `机器人碰撞到${hit.hitTop ? '上' : '下'}边界，方向已反转\n`;
             }
+        }
+
+        // 重置机器人位置
+        function resetRobotPosition() {
+            const robot = document.getElementById('robot');
+            robot.style.transition = 'all 0.5s ease';
+            robot.style.left = '50px';
+            robot.style.top = '120px';
+            robot.style.transform = 'rotate(0deg)';
+            robot.dataset.rotation = '0';
+            
+            updatePositionDisplay(50, 120, 0);
+            
+            document.getElementById('log').textContent +=
+                '机器人位置已重置到初始位置\n';
         }
 
         // 更新坐标显示
