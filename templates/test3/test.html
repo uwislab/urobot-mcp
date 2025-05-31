@@ -68,19 +68,18 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h1><i class="fas fa-robot"></i> 机器人仿真控制系统 (C代码执行版)</h1>
-            <button onclick="window.location.href='/'" 
+            <button onclick="window.location.href='/'"
                     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                            color: white; padding: 12px 24px; border: none; border-radius: 12px;
                            cursor: pointer; font-weight: 600; transition: all 0.3s;">
                 <i class="fas fa-home"></i> 返回首页
             </button>
         </div>
-        
+
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
             <!-- 机器人仿真区域 -->
             <div class="simulation-panel">
@@ -145,173 +144,205 @@
     </div>
 
     <script>
-        // 机器人状态管理器
-        const robot = {
-            x: 50,        // X坐标 (px)
-            y: 120,       // Y坐标 (px)
-            rotation: 0,  // 旋转角度 (度)
-            width: 60,    // 机器人宽度 (px)
-            height: 60    // 机器人高度 (px)
-        };
-
-        // 生成带运动计算的C代码
+        // 生成C代码模板
         function generateCCode(action, params) {
-            return `#include <stdio.h>
-#include <math.h>
+            let code = `#include <stdio.h>
 
-// 接收当前状态并返回运动数据
-void calculate_movement(int action, int param, float* dx, float* dy, int* rot) {
-    static float angle = ${robot.rotation}; // 保持角度状态
-    float radians;
+void forward(int speed, int distance) {
+    printf("机器人以速度 %d 前进 %d 距离\\n", speed, distance);
+}
 
-    switch(action) {
-        case 0: // 前进
-            radians = angle * M_PI / 180;
-            *dx = param * cos(radians);
-            *dy = param * sin(radians);
-            break;
-        case 1: // 后退
-            radians = angle * M_PI / 180;
-            *dx = -param * cos(radians);
-            *dy = -param * sin(radians);
-            break;
-        case 2: // 左转
-            *rot = (angle - param + 360) % 360;
-            angle = *rot;
-            break;
-        case 3: // 右转
-            *rot = (angle + param) % 360;
-            angle = *rot;
-            break;
-    }
-    printf("{%caction%c:%d,%cx:%f,%cy:%f,%crot:%d%c}",
-           34, 34, action, 34, *dx, 34, *dy, 34, *rot, 34);
+void back(int speed, int distance) {
+    printf("机器人以速度 %d 后退 %d 距离\\n", speed, distance);
+}
+
+void turn_left(int degree) {
+    printf("机器人左转 %d 度\\n", degree);
+}
+
+void turn_right(int degree) {
+    printf("机器人右转 %d 度\\n", degree);
 }
 
 int main() {
-    float dx = 0, dy = 0;
-    int rot = 0;
+    `;
 
-    calculate_movement(${actionToCode(action)}, ${params.value}, &dx, &dy, &rot);
-
-    return 0;
-}`;
-        }
-
-        // 动作类型映射表
-        const actionMap = {
-            forward: 0,
-            back: 1,
-            left: 2,
-            right: 3
-        };
-
-        // 将动作转换为代码编号
-        function actionToCode(action) {
-            return actionMap[action] || 0;
-        }
-
-        // 初始化机器人状态
-        function initRobot() {
-            const robotElem = document.getElementById('robot');
-            robot.x = parseFloat(robotElem.style.left) || 50;
-            robot.y = parseFloat(robotElem.style.top) || 120;
-            robot.rotation = parseInt(robotElem.dataset.rotation) || 0;
-        }
-
-        // 页面加载完成后初始化
-        window.addEventListener('DOMContentLoaded', initRobot);
-
-        // 执行命令的核心函数
-        function executeCommand(action) {
-            const params = getInputParams(action);
-            const cCode = generateCCode(action, params);
-
-            picocjs.runC(cCode, (output) => {
-                const result = JSON.parse(output);
-                updateRobotState(result, action);
-                renderRobot();
-                checkBoundaryCollision();
-            });
-
-            recordCommand(action, params);
-        }
-
-        // 获取用户输入参数
-        function getInputParams(action) {
             switch(action) {
                 case 'forward':
-                    return { value: parseInt(forwardSpeed.value) };
+                    code += `forward(${params.speed}, ${params.distance});`;
+                    break;
                 case 'back':
-                    return { value: parseInt(backDistance.value) };
+                    code += `back(${params.speed}, ${params.distance});`;
+                    break;
                 case 'left':
+                    code += `turn_left(${params.degree});`;
+                    break;
                 case 'right':
-                    return { value: parseInt(turnDegree.value) };
+                    code += `turn_right(${params.degree});`;
+                    break;
+            }
+
+            code += `
+    return 0;
+}`;
+
+            return code;
+        }
+
+        // 执行C代码命令
+        function executeCommand(action) {
+            const robot = document.getElementById('robot');
+            let cCode = '';
+            let command = '';
+
+            // 获取参数并生成C代码
+            switch(action) {
+                case 'forward':
+                    const forwardSpeed = parseInt(document.getElementById('forwardSpeed').value);
+                    const forwardDistance = parseInt(document.getElementById('forwardDistance').value);
+                    cCode = generateCCode('forward', {speed: forwardSpeed, distance: forwardDistance});
+                    command = `    forward(${forwardSpeed}, ${forwardDistance});`;
+                    moveRobotWithRotation(robot, forwardDistance, forwardSpeed);
+                    break;
+
+                case 'back':
+                    const backSpeed = parseInt(document.getElementById('backSpeed').value);
+                    const backDistance = parseInt(document.getElementById('backDistance').value);
+                    cCode = generateCCode('back', {speed: backSpeed, distance: backDistance});
+                    command = `    back(${backSpeed}, ${backDistance});`;
+                    moveRobotWithRotation(robot, -backDistance, backSpeed);
+                    break;
+
+                case 'left':
+                    const leftDegree = parseInt(document.getElementById('turnDegree').value);
+                    cCode = generateCCode('left', {degree: leftDegree});
+                    command = `    turn_left(${leftDegree});`;
+                    const currentRot = parseInt(robot.dataset.rotation || '0');
+                    const newRot = (currentRot - leftDegree) % 360;
+                    robot.style.transform = `rotate(${newRot}deg)`;
+                    robot.dataset.rotation = newRot;
+                    break;
+
+                case 'right':
+                    const rightDegree = parseInt(document.getElementById('turnDegree').value);
+                    cCode = generateCCode('right', {degree: rightDegree});
+                    command = `    turn_right(${rightDegree});`;
+                    const rightCurrentRot = parseInt(robot.dataset.rotation || '0');
+                    const rightNewRot = (rightCurrentRot + rightDegree) % 360;
+                    robot.style.transform = `rotate(${rightNewRot}deg)`;
+                    robot.dataset.rotation = rightNewRot;
+                    break;
+            }
+
+            // 执行C代码
+            picocjs.runC(cCode, (output) => {
+                const logElement = document.getElementById('log');
+                logElement.textContent += output + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+            });
+
+            // 记录C语言命令
+            if (command) {
+                const commandLog = document.getElementById('commandLog');
+                const commandElement = document.createElement('div');
+                commandElement.className = 'command';
+                commandElement.textContent = command;
+                commandLog.appendChild(commandElement);
+                commandLog.scrollTop = commandLog.scrollHeight;
             }
         }
 
-        // 更新机器人状态
-        function updateRobotState(result, action) {
-            if(action === 'forward' || action === 'back') {
-                robot.x += result.x;
-                robot.y += result.y;
-            } else {
-                robot.rotation = result.rot;
+        // 检查边界碰撞
+        function checkBoundaryCollision(robot) {
+            const sim = document.getElementById('robotSimulation');
+            const simRect = sim.getBoundingClientRect();
+            const robotRect = robot.getBoundingClientRect();
+
+            // 边界检测
+            const hitLeft = robotRect.left <= simRect.left;
+            const hitRight = robotRect.right >= simRect.right;
+            const hitTop = robotRect.top <= simRect.top;
+            const hitBottom = robotRect.bottom >= simRect.bottom;
+
+            return { hitLeft, hitRight, hitTop, hitBottom };
+        }
+
+        // 处理边界反弹
+        function handleBoundaryBounce(robot, hit) {
+            if (hit.hitLeft || hit.hitRight) {
+                // 水平反弹 - 反转X方向
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                robot.dataset.rotation = (180 - currentRot) % 360;
+                robot.style.transform = `rotate(${robot.dataset.rotation}deg)`;
+
+                // 记录碰撞
+                document.getElementById('log').textContent +=
+                    `机器人碰撞到${hit.hitLeft ? '左' : '右'}边界，方向已反转\n`;
+            }
+
+            if (hit.hitTop || hit.hitBottom) {
+                // 垂直反弹 - 反转Y方向
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                robot.dataset.rotation = (-currentRot) % 360;
+                robot.style.transform = `rotate(${robot.dataset.rotation}deg)`;
+
+                // 记录碰撞
+                document.getElementById('log').textContent +=
+                    `机器人碰撞到${hit.hitTop ? '上' : '下'}边界，方向已反转\n`;
             }
         }
 
-        // 渲染机器人位置和角度
-        function renderRobot() {
-            const elem = document.getElementById('robot');
-            elem.style.left = `${clamp(robot.x, 5, getSimWidth() - robot.width - 5)}px`;
-            elem.style.top = `${clamp(robot.y, 5, getSimHeight() - robot.height - 5)}px`;
-            elem.style.transform = `rotate(${robot.rotation}deg)`;
-            elem.dataset.rotation = robot.rotation;
-        }
+        // 根据旋转角度计算并移动机器人
+        function moveRobotWithRotation(robot, distance, speed) {
+            // 获取当前位置和旋转角度
+            const currentLeft = parseFloat(robot.style.left || '50');
+            const currentTop = parseFloat(robot.style.top || '120');
+            const rotation = parseFloat(robot.dataset.rotation || '0');
 
-        // 边界检测与处理
-        function checkBoundaryCollision() {
-            const { x, y, width, height } = robot;
-            const simWidth = getSimWidth();
-            const simHeight = getSimHeight();
-            let hit = { left: false, right: false, top: false, bottom: false };
+            // 将角度转换为弧度
+            const radians = rotation * Math.PI / 180;
 
-            if(x <= 5) hit.left = true;
-            if(x >= simWidth - width - 5) hit.right = true;
-            if(y <= 5) hit.top = true;
-            if(y >= simHeight - height - 5) hit.bottom = true;
+            // 计算基于角度的X和Y方向的移动距离
+            const deltaX = Math.cos(radians) * distance;
+            const deltaY = Math.sin(radians) * distance;
 
-            if(Object.values(hit).some(v => v)) {
-                handleBoundaryBounce(hit);
-                return true;
-            }
-            return false;
-        }
+            // 计算新位置
+            let newLeft = currentLeft + deltaX;
+            let newTop = currentTop + deltaY;
 
-        // 边界反弹处理
-        function handleBoundaryBounce(hit) {
-            if(hit.left || hit.right) {
-                robot.rotation = (180 - robot.rotation) % 360;
-                logMessage('检测到水平边界碰撞，方向已反转');
-            }
-            if(hit.top || hit.bottom) {
-                robot.rotation = (-robot.rotation) % 360;
-                logMessage('检测到垂直边界碰撞，方向已反转');
-            }
-        }
+            // 获取仿真区域尺寸
+            const sim = document.getElementById('robotSimulation');
+            const simWidth = sim.offsetWidth;
+            const simHeight = sim.offsetHeight;
+            const robotWidth = robot.offsetWidth;
+            const robotHeight = robot.offsetHeight;
 
-        // 辅助函数
-        function clamp(value, min, max) { return Math.min(Math.max(value, min), max); }
-        function getSimWidth() { return document.getElementById('robotSimulation').offsetWidth; }
-        function getSimHeight() { return document.getElementById('robotSimulation').offsetHeight; }
-        function logMessage(msg) {
-            const log = document.getElementById('log');
-            log.textContent += `${new Date().toLocaleTimeString()} - ${msg}\\n`;
-            log.scrollTop = log.scrollHeight;
-        }
-        function recordCommand(action, params) {
-            const log = document.getElementById('commandLog');
-            log.innerHTML += `    ${action}(${params.value});<br>`;
+            // 边界检查和调整
+            if (newLeft < 5) newLeft = 5;
+            if (newLeft + robotWidth > simWidth - 5) newLeft = simWidth - robotWidth - 5;
+            if (newTop < 5) newTop = 5;
+            if (newTop + robotHeight > simHeight - 5) newTop = simHeight - robotHeight - 5;
+
+            // 计算动画持续时间
+            const duration = Math.abs(distance) / (speed * 10);
+
+            // 设置过渡效果并应用新位置
+            robot.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+            robot.style.left = newLeft + 'px';
+            robot.style.top = newTop + 'px';
+
+            // 记录移动信息
+            document.getElementById('log').textContent +=
+                `机器人向${rotation}度方向移动了${distance > 0 ? '前' : '后'}${Math.abs(distance)}单位\n`;
+
+            // 移动结束后检查边界
+            robot.addEventListener('transitionend', function onTransitionEnd() {
+                const hit = checkBoundaryCollision(robot);
+                if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                    handleBoundaryBounce(robot, hit);
+                }
+                robot.removeEventListener('transitionend', onTransitionEnd);
+            });
         }
     </script>
 </body>
