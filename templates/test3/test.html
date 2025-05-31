@@ -83,9 +83,32 @@
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
             <!-- 机器人仿真区域 -->
             <div class="simulation-panel">
-                <div id="positionDisplay" style="background: rgba(255,255,255,0.8); padding: 10px; border-radius: 8px; margin-bottom: 10px; font-family: monospace;">
-                    坐标: <span id="robotX">50</span>px, <span id="robotY">120</span>px | 
-                    角度: <span id="robotAngle">0</span>°
+                <div id="positionDisplay" style="
+                    background: linear-gradient(135deg, rgba(42,82,152,0.9) 0%, rgba(67,126,235,0.9) 100%);
+                    padding: 15px 20px;
+                    border-radius: 12px;
+                    margin-bottom: 15px;
+                    font-family: 'Segoe UI', system-ui, sans-serif;
+                    color: white;
+                    font-size: 1.2rem;
+                    font-weight: 500;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <div>
+                        <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+                        <span>X: <span id="robotX" style="font-weight: 600;">50</span> px</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
+                        <span>Y: <span id="robotY" style="font-weight: 600;">120</span> px</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-compass" style="margin-right: 8px;"></i>
+                        <span>角度: <span id="robotAngle" style="font-weight: 600;">0</span>°</span>
+                    </div>
                 </div>
                 <div id="robotSimulation">
                     <div class="boundary" id="boundary-top"></div>
