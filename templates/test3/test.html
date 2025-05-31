@@ -156,7 +156,10 @@ typedef struct {
     float rotation;
 } RobotState;
 
-RobotState robot = {50.0, 120.0, 0.0};
+RobotState robot;
+robot.x = 50.0;
+robot.y = 120.0;
+robot.rotation = 0.0;
 
 void update_robot_position(float deltaX, float deltaY) {
     robot.x += deltaX;
@@ -202,6 +205,11 @@ void turn_right(int degree) {
 }
 
 int main() {
+    // 初始化机器人状态
+    robot.x = 50.0;
+    robot.y = 120.0;
+    robot.rotation = 0.0;
+    
     `;
 
             switch(action) {
