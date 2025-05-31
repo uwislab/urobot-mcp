@@ -164,7 +164,7 @@ robot.rotation = 0.0;
 void update_robot_position(float deltaX, float deltaY) {
     robot.x += deltaX;
     robot.y += deltaY;
-    
+
     // 边界检查
     if (robot.x < 5) robot.x = 5;
     if (robot.x > 795) robot.x = 795;
@@ -174,23 +174,23 @@ void update_robot_position(float deltaX, float deltaY) {
 
 void forward(int speed, int distance) {
     printf("机器人以速度 %d 前进 %d 距离\\n", speed, distance);
-    
+
     // 计算移动距离
     float radians = robot.rotation * M_PI / 180.0;
     float deltaX = cos(radians) * distance;
     float deltaY = sin(radians) * distance;
-    
+
     update_robot_position(deltaX, deltaY);
 }
 
 void back(int speed, int distance) {
     printf("机器人以速度 %d 后退 %d 距离\\n", speed, distance);
-    
+
     // 计算移动距离 (反向)
     float radians = robot.rotation * M_PI / 180.0;
     float deltaX = -cos(radians) * distance;
     float deltaY = -sin(radians) * distance;
-    
+
     update_robot_position(deltaX, deltaY);
 }
 
@@ -209,7 +209,7 @@ int main() {
     robot.x = 50.0;
     robot.y = 120.0;
     robot.rotation = 0.0;
-    
+
     `;
 
             switch(action) {
@@ -284,7 +284,7 @@ int main() {
                 const logElement = document.getElementById('log');
                 logElement.textContent += output + '\n';
                 logElement.scrollTop = logElement.scrollHeight;
-                
+
                 // 从C代码执行结果中获取机器人状态
                 const robotState = picocjs.getGlobal('robot');
                 if (robotState) {
