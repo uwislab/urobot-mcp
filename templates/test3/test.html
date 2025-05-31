@@ -158,22 +158,14 @@
             position: absolute;
             width: 60px;
             height: 60px;
-            background-color: #2a5298;
-            border-radius: 10px;
+            background-image: url('/static/robot.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
             transition: all 0.5s ease;
             left: 50px;
             top: 120px;
             transform-origin: center;
-        }
-        
-        #robotDirection {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: red;
-            border-radius: 50%;
-            right: 5px;
-            top: 25px;
         }
         
         /* 控制台样式 */
@@ -250,9 +242,7 @@
                     <div class="boundary" id="boundary-bottom"></div>
                     <div class="boundary" id="boundary-left"></div>
                     <div class="boundary" id="boundary-right"></div>
-                    <div id="robot" data-rotation="0" style="left: 50px; top: 120px; width: 60px; height: 60px; background-color: #2a5298; border-radius: 10px; position: absolute; transition: all 0.5s ease; transform-origin: center;">
-                        <div id="robotDirection" style="position: absolute; width: 10px; height: 10px; background-color: red; border-radius: 50%; right: 5px; top: 25px;"></div>
-                    </div>
+                    <div id="robot" data-rotation="0" style="left: 50px; top: 120px; width: 60px; height: 60px; background-image: url('/static/robot.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; transition: all 0.5s ease; transform-origin: center;"></div>
                 </div>
             </div>
 
