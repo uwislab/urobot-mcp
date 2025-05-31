@@ -70,7 +70,79 @@
 </head>
 
 <body>
-    <!-- HTML结构保持不变 -->
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1><i class="fas fa-robot"></i> 机器人仿真控制系统 (C代码执行版)</h1>
+            <button onclick="window.location.href='/'" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                           color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                           cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                <i class="fas fa-home"></i> 返回首页
+            </button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+            <!-- 机器人仿真区域 -->
+            <div class="simulation-panel">
+                <div id="robotSimulation">
+                    <div class="boundary" id="boundary-top"></div>
+                    <div class="boundary" id="boundary-bottom"></div>
+                    <div class="boundary" id="boundary-left"></div>
+                    <div class="boundary" id="boundary-right"></div>
+                    <div id="robot" data-rotation="0" style="left: 50px; top: 120px; width: 60px; height: 60px; background-color: #2a5298; border-radius: 10px; position: absolute; transition: all 0.5s ease; transform-origin: center;">
+                        <div id="robotDirection" style="position: absolute; width: 10px; height: 10px; background-color: red; border-radius: 50%; right: 5px; top: 25px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制面板和输出区域 -->
+            <div class="control-panel">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div class="control-group">
+                            <h3>前进控制</h3>
+                            <div>速度: <input type="number" id="forwardSpeed" min="1" max="8" value="4"></div>
+                            <div>距离: <input type="number" id="forwardDistance" min="1" max="200" value="50"></div>
+                            <button onclick="executeCommand('forward')">前进</button>
+                        </div>
+
+                        <div class="control-group">
+                            <h3>后退控制</h3>
+                            <div>速度: <input type="number" id="backSpeed" min="1" max="8" value="4"></div>
+                            <div>距离: <input type="number" id="backDistance" min="1" max="200" value="50"></div>
+                            <button onclick="executeCommand('back')">后退</button>
+                        </div>
+
+                        <div class="control-group">
+                            <h3>转向控制</h3>
+                            <div>角度: <input type="number" id="turnDegree" min="1" max="360" value="90"></div>
+                            <div>
+                                <button onclick="executeCommand('left')">左转</button>
+                                <button onclick="executeCommand('right')">右转</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="control-group">
+                            <h3>控制台输出</h3>
+                            <pre id="log" style="background: #f5f5f5; padding: 10px; border-radius: 5px; height: 200px; overflow: auto;"></pre>
+                        </div>
+
+                        <div class="control-group">
+                            <h3>C语言命令</h3>
+                            <div id="console" style="background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 5px; height: 200px; overflow: auto;">
+                                <div>// 机器人控制命令记录</div>
+                                <div>void main() {</div>
+                                <div id="commandLog"></div>
+                                <div>}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // 机器人状态管理器
@@ -134,6 +206,22 @@ int main() {
             right: 3
         };
 
+        // 将动作转换为代码编号
+        function actionToCode(action) {
+            return actionMap[action] || 0;
+        }
+
+        // 初始化机器人状态
+        function initRobot() {
+            const robotElem = document.getElementById('robot');
+            robot.x = parseFloat(robotElem.style.left) || 50;
+            robot.y = parseFloat(robotElem.style.top) || 120;
+            robot.rotation = parseInt(robotElem.dataset.rotation) || 0;
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', initRobot);
+
         // 执行命令的核心函数
         function executeCommand(action) {
             const params = getInputParams(action);
@@ -193,7 +281,11 @@ int main() {
             if(y <= 5) hit.top = true;
             if(y >= simHeight - height - 5) hit.bottom = true;
 
-            if(Object.values(hit).some(v => v)) handleBoundaryBounce(hit);
+            if(Object.values(hit).some(v => v)) {
+                handleBoundaryBounce(hit);
+                return true;
+            }
+            return false;
         }
 
         // 边界反弹处理
