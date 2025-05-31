@@ -231,31 +231,18 @@
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
             <!-- 机器人仿真区域 -->
             <div class="simulation-panel">
-                <div id="positionDisplay" style="
-                    background: linear-gradient(135deg, rgba(42,82,152,0.9) 0%, rgba(67,126,235,0.9) 100%);
-                    padding: 15px 20px;
-                    border-radius: 12px;
-                    margin-bottom: 15px;
-                    font-family: 'Segoe UI', system-ui, sans-serif;
-                    color: white;
-                    font-size: 1.2rem;
-                    font-weight: 500;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                ">
+                <div id="positionDisplay">
                     <div>
-                        <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
-                        <span>X: <span id="robotX" style="font-weight: 600;">50</span> px</span>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>X: <span id="robotX" class="position-value">50</span> px</span>
                     </div>
                     <div>
-                        <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
-                        <span>Y: <span id="robotY" style="font-weight: 600;">120</span> px</span>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Y: <span id="robotY" class="position-value">120</span> px</span>
                     </div>
                     <div>
-                        <i class="fas fa-compass" style="margin-right: 8px;"></i>
-                        <span>角度: <span id="robotAngle" style="font-weight: 600;">0</span>°</span>
+                        <i class="fas fa-compass"></i>
+                        <span>角度: <span id="robotAngle" class="position-value">0</span>°</span>
                     </div>
                 </div>
                 <div id="robotSimulation">
