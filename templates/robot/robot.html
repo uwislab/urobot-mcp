@@ -681,28 +681,17 @@ int main() {
             return { hitLeft, hitRight, hitTop, hitBottom, hitObstacle };
         }
 
-        // 处理边界反弹
-        function handleBoundaryBounce(robot, hit) {
-            if (hit.hitLeft || hit.hitRight) {
-                // 水平反弹 - 反转X方向
-                const currentRot = parseInt(robot.dataset.rotation || '0');
-                robot.dataset.rotation = (180 - currentRot) % 360;
-                robot.style.transform = `rotate(${robot.dataset.rotation}deg)`;
-
-                // 记录碰撞
-                document.getElementById('log').textContent +=
-                    `机器人碰撞到${hit.hitLeft ? '左' : '右'}边界，方向已反转\n`;
-            }
-
-            if (hit.hitTop || hit.hitBottom) {
-                // 垂直反弹 - 反转Y方向
-                const currentRot = parseInt(robot.dataset.rotation || '0');
-                robot.dataset.rotation = (-currentRot) % 360;
-                robot.style.transform = `rotate(${robot.dataset.rotation}deg)`;
-
-                // 记录碰撞
-                document.getElementById('log').textContent +=
-                    `机器人碰撞到${hit.hitTop ? '上' : '下'}边界，方向已反转\n`;
+        // 处理边界碰撞
+        function handleBoundaryCollision(robot, hit) {
+            // 记录碰撞信息
+            if (hit.hitLeft) {
+                document.getElementById('log').textContent += `机器人碰撞到左边界，已停止\n`;
+            } else if (hit.hitRight) {
+                document.getElementById('log').textContent += `机器人碰撞到右边界，已停止\n`;
+            } else if (hit.hitTop) {
+                document.getElementById('log').textContent += `机器人碰撞到上边界，已停止\n`;
+            } else if (hit.hitBottom) {
+                document.getElementById('log').textContent += `机器人碰撞到下边界，已停止\n`;
             }
         }
 
@@ -854,7 +843,7 @@ int main() {
                             document.getElementById('log').textContent +=
                                 `碰撞到障碍物，运动命令已终止\n`;
                         } else {
-                            handleBoundaryBounce(robot, hit);
+                            handleBoundaryCollision(robot, hit);
                         }
                         return;
                     }
