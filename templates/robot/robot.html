@@ -347,6 +347,9 @@
             left: false,
             right: false
         };
+        
+        // 碰撞检测状态
+        let collisionDetectionEnabled = true;
 
         // 键盘事件监听
         document.addEventListener('keydown', (e) => {
@@ -638,6 +641,15 @@ int main() {
 
         // 精确碰撞检测 (返回碰撞信息)
         function checkCollision(robot) {
+            if (!collisionDetectionEnabled) {
+                return {
+                    hitLeft: false,
+                    hitRight: false,
+                    hitTop: false,
+                    hitBottom: false,
+                    hitObstacle: false
+                };
+            }
             const sim = document.getElementById('robotSimulation');
             const simRect = sim.getBoundingClientRect();
             const robotRect = robot.getBoundingClientRect();
@@ -719,6 +731,9 @@ int main() {
 
         // 切换地图
         function switchMap(mapName) {
+            // 禁用碰撞检测
+            collisionDetectionEnabled = false;
+            
             const config = mapConfigs[mapName];
             
             // 重置机器人位置
@@ -742,6 +757,11 @@ int main() {
             // 记录地图切换
             document.getElementById('log').textContent +=
                 `已切换到${mapName === 'map1' ? '地图1' : '地图2'}\n`;
+            
+            // 重新启用碰撞检测
+            setTimeout(() => {
+                collisionDetectionEnabled = true;
+            }, 1000);
         }
 
         // 重置机器人位置
