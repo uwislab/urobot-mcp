@@ -836,23 +836,32 @@ int main() {
             const checkInterval = setInterval(() => {
                 const hit = checkCollision(robot);
                 if (hit.hitObstacle || hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
-                    // 停止移动
+                    // 停止移动并终止命令
                     robot.style.transition = 'none';
                     robot.style.left = robot.style.left;
                     robot.style.top = robot.style.top;
                     clearInterval(checkInterval);
                     
-                    if (hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                    // 移除transitionend监听器
+                    robot.removeEventListener('transitionend', onTransitionEnd);
+                    
+                    // 记录碰撞信息
+                    if (hit.hitObstacle) {
+                        document.getElementById('log').textContent +=
+                            `碰撞到障碍物，运动命令已终止\n`;
+                    } else {
                         handleBoundaryBounce(robot, hit);
                     }
+                    return; // 立即终止函数执行
                 }
             }, 50);
 
             // 移动结束后清除检查
-            robot.addEventListener('transitionend', function onTransitionEnd() {
+            function onTransitionEnd() {
                 clearInterval(checkInterval);
                 robot.removeEventListener('transitionend', onTransitionEnd);
-            });
+            }
+            robot.addEventListener('transitionend', onTransitionEnd);
         }
     </script>
 </body>
