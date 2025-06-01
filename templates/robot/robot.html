@@ -832,36 +832,42 @@ int main() {
             document.getElementById('log').textContent +=
                 `机器人向${rotation}度方向移动了${distance > 0 ? '前' : '后'}${Math.abs(distance)}单位\n`;
 
-            // 移动过程中持续检查碰撞
-            const checkInterval = setInterval(() => {
-                const hit = checkCollision(robot);
-                if (hit.hitObstacle || hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
-                    // 停止移动并终止命令
-                    robot.style.transition = 'none';
-                    robot.style.left = robot.style.left;
-                    robot.style.top = robot.style.top;
-                    clearInterval(checkInterval);
-
-                    // 移除transitionend监听器
-                    robot.removeEventListener('transitionend', onTransitionEnd);
-
-                    // 记录碰撞信息
-                    if (hit.hitObstacle) {
-                        document.getElementById('log').textContent +=
-                            `碰撞到障碍物，运动命令已终止\n`;
-                    } else {
-                        handleBoundaryBounce(robot, hit);
+            // 使用requestAnimationFrame进行逐帧碰撞检测
+            let animationId;
+            let lastTime = 0;
+            const checkCollisionFrame = (timestamp) => {
+                if (!lastTime) lastTime = timestamp;
+                const elapsed = timestamp - lastTime;
+                
+                // 每16ms检查一次碰撞(约60fps)
+                if (elapsed >= 16) {
+                    const hit = checkCollision(robot);
+                    if (hit.hitObstacle || hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                        // 立即停止动画和移动
+                        cancelAnimationFrame(animationId);
+                        robot.style.transition = 'none';
+                        robot.style.left = robot.style.left;
+                        robot.style.top = robot.style.top;
+                        
+                        // 记录碰撞信息
+                        if (hit.hitObstacle) {
+                            document.getElementById('log').textContent +=
+                                `碰撞到障碍物，运动命令已终止\n`;
+                        } else {
+                            handleBoundaryBounce(robot, hit);
+                        }
+                        return;
                     }
-                    return; // 立即终止函数执行
+                    lastTime = timestamp;
                 }
-            }, 50);
+                animationId = requestAnimationFrame(checkCollisionFrame);
+            };
+            animationId = requestAnimationFrame(checkCollisionFrame);
 
             // 移动结束后清除检查
-            function onTransitionEnd() {
-                clearInterval(checkInterval);
-                robot.removeEventListener('transitionend', onTransitionEnd);
-            }
-            robot.addEventListener('transitionend', onTransitionEnd);
+            robot.addEventListener('transitionend', () => {
+                cancelAnimationFrame(animationId);
+            }, { once: true });
         }
     </script>
 </body>
