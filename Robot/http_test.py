@@ -47,7 +47,9 @@ def test_http_commands():
             # 使用requests库发送HTTP请求
             # 处理带参数的URL
             if '?' in cmd:
-                url = f"{base_url}?{cmd.split('?')[1]}&id={robot_id}"
+                base_cmd = cmd.split('?')[0]
+                params = cmd.split('?')[1]
+                url = f"{base_url}?cmd={base_cmd}&{params}&id={robot_id}"
             else:
                 url = f"{base_url}?cmd={cmd}&id={robot_id}"
             
