@@ -1,19 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- 
+    Deepseek功能页面
+    功能：
+    1. 提供Deepseek API调用界面
+    2. 支持生成C代码和PlantUML
+    3. 语音输入功能
+    4. 历史记录管理
+    5. 返回首页功能
+-->
+<html lang="zh-CN">  <!-- 设置中文语言 -->
 
 <head>
-    <!-- 页面基础设置 -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新页面 - Deepseek 功能页面</title>
+    <!-- ========== 页面元数据 ========== -->
+    <meta charset="UTF-8">  <!-- 设置UTF-8字符编码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局设置 -->
+    <meta name="description" content="Deepseek API调用界面">  <!-- 页面描述 -->
+    <title>Deepseek功能页面</title>  <!-- 页面标题 -->
     <style>
-        /* 页面整体样式 */
+        /* ========== 全局样式 ========== */
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;  /* 使用系统字体 */
-            background-image: url('../static/deepseek_logo.png');  /* 背景图片 */
-            background-size: cover;  /* 背景图片覆盖整个页面 */
-            background-position: center;  /* 背景图片居中 */
-            background-attachment: fixed;  /* 背景图片固定 */
+            /* 字体设置 - 优先使用系统字体 */
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            
+            /* 背景设置 */
+            background-image: url('../static/deepseek_logo.png');  /* 背景图片路径 */
+            background-size: cover;  /* 背景图片完全覆盖 */
+            background-position: center;  /* 背景图片居中显示 */
+            background-attachment: fixed;  /* 背景图片固定不滚动 */
+            background-repeat: no-repeat;  /* 背景图片不重复 */
+            
+            /* 布局设置 */
             display: flex;
             justify-content: center;  /* 水平居中 */
             align-items: center;  /* 垂直居中 */
@@ -187,10 +203,15 @@
     </div>
 
     <script>
-        // 历史记录功能
-        const HISTORY_KEY = 'scriptHistory';
+        /* 
+         * 历史记录功能
+         * 使用localStorage存储API调用历史
+         * 支持查看、删除历史记录
+         */
+        const HISTORY_KEY = 'scriptHistory';  // localStorage键名
 
         // 加载历史记录
+        // 按时间倒序显示最近的10条记录
         function loadHistory() {
             const historyList = document.getElementById('historyList');
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
@@ -262,7 +283,12 @@
         const runScript4Button = document.getElementById('runScript4Button');
         const resultText = document.getElementById('result');
 
-        // 运行脚本的通用函数
+        /* 
+         * 运行脚本函数
+         * 调用后端API执行脚本
+         * 参数: endpoint - API端点路径
+         * 功能: 显示加载状态、处理响应、错误处理和保存历史记录
+         */
         async function runScript(endpoint) {
             try {
                 // 显示加载动画
@@ -328,13 +354,17 @@
             }
         }
 
-        // 语音识别功能
+        /* 
+         * 语音识别功能
+         * 使用Web Speech API实现语音转文字
+         * 支持中文语音输入
+         */
         const voiceInputButton = document.getElementById('voiceInputButton');
         const promptInput = document.getElementById('promptInput');
-        let recognition = null;
-        let isListening = false;
+        let recognition = null;  // 语音识别实例
+        let isListening = false;  // 监听状态标志
 
-        // 检查浏览器是否支持语音识别
+        // 检查浏览器是否支持语音识别API
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
