@@ -38,7 +38,9 @@ def test_http_commands():
         
         # 特殊功能测试
         ("beep?freq=440&duration=1000", 0),  # 测试蜂鸣器
-        ("say?text=hello", 0)               # 测试语音
+        ("say?text=hello", 0),              # 测试语音
+        ("?id=0", 0),                      # 测试缺少cmd参数
+        ("?speed=5&id=0", 0)               # 测试只有参数没有cmd
     ]
     
     for cmd, robot_id in commands:
@@ -46,12 +48,15 @@ def test_http_commands():
         try:
             # 使用requests库发送HTTP请求
             # 处理带参数的URL
-            if '?' in cmd:
-                base_cmd = cmd.split('?')[0]
-                params = cmd.split('?')[1]
-                url = f"{base_url}?cmd={base_cmd}&{params}&id={robot_id}"
-            else:
-                url = f"{base_url}?cmd={cmd}&id={robot_id}"
+            if not cmd.startswith('?'):  # 正常命令处理
+                if '?' in cmd:
+                    base_cmd = cmd.split('?')[0]
+                    params = cmd.split('?')[1]
+                    url = f"{base_url}?cmd={base_cmd}&{params}&id={robot_id}"
+                else:
+                    url = f"{base_url}?cmd={cmd}&id={robot_id}"
+            else:  # 特殊测试用例，故意不添加cmd参数
+                url = f"{base_url}{cmd}&id={robot_id}"
             
             print(f"请求URL: {url}")
             response = requests.get(url, timeout=5)
