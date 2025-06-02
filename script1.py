@@ -59,8 +59,8 @@ def generate_c_code(user_prompt: Optional[str] = None) -> str:
             "知识储备：熟练掌握 C 语言的各种语法、数据结构、算法及标准库函数。\n"
             "请根据以下需求生成 C 语言代码：\n"
             f"{user_prompt}\n"
-            "使用python调用os包将生成的C语言代码作为文本保存到本地,"
             "不需要C语言代码运行只需要保存到本地"
+            "使用python调用os包将生成的C语言代码作为文本保存到本地,"
             "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\sort_ollama.c"
         )
         

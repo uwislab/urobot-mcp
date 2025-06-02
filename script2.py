@@ -68,8 +68,9 @@ def generate_plantuml(user_prompt: Optional[str] = None) -> str:
             "知识储备：精通 PlantUML 语法及各类图形绘制规则。\n"
             "请根据以下描述生成 PlantUML 代码：\n"
             f"{user_prompt}\n"
-            "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml_ollama.txt"
             "1.只调用os的python包，2.将PlantUML代码在python代码中作为文本写入txt文件"
+            "保存位置C:\PlantUML\plantuml_graphviz_word2019_template_win64\estuml_ollama.txt"
+
         )
         
         # 获取生成的代码
