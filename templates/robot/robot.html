@@ -1,13 +1,27 @@
 <!DOCTYPE html>
+<!-- 
+    机器人仿真页面
+    功能：
+    1. 提供机器人仿真环境
+    2. 支持键盘和按钮控制机器人移动
+    3. 支持C代码命令执行
+    4. 提供地图切换功能
+    5. 实时显示机器人坐标和角度
+-->
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>仿真机器人</title>
-    <script src="/static/js/picoc-js/dist/bundle.umd.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ========== 页面元数据 ========== -->
+    <meta charset="UTF-8">  <!-- 设置UTF-8字符编码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局设置 -->
+    <meta name="description" content="机器人仿真控制界面">  <!-- 页面描述 -->
+    <title>仿真机器人</title>  <!-- 页面标题 -->
+    <!-- ========== 外部资源 ========== -->
+    <script src="/static/js/picoc-js/dist/bundle.umd.js" type="text/javascript"></script>  <!-- PicoC JS解释器 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  <!-- Font Awesome图标库 -->
+    
+    <!-- ========== 页面样式 ========== -->
     <style>
-        /* 基础样式 */
+        /* ========== 基础样式 ========== */
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             background: #f8fafc;
@@ -220,9 +234,10 @@
 </head>
 <body>
     <div class="container">
+        <!-- ========== 顶部控制栏 ========== -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1><i class="fas fa-robot"></i> 仿真机器人</h1>
-            <div style="display: flex; gap: 10px;">
+            <h1><i class="fas fa-robot"></i> 仿真机器人</h1>  <!-- 页面标题 -->
+            <div style="display: flex; gap: 10px;">  <!-- 控制按钮组 -->
                 <button onclick="switchMap('map1')"
                         style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
                                color: white; padding: 12px 24px; border: none; border-radius: 12px;
@@ -254,8 +269,9 @@
             </div>
         </div>
 
+        <!-- ========== 主内容区域 ========== -->
         <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
-            <!-- 机器人仿真区域 -->
+            <!-- ========== 机器人仿真区域 ========== -->
             <div class="simulation-panel">
                 <div id="positionDisplay">
                     <div>
@@ -335,7 +351,12 @@
         </div>
     </div>
 
+    <!-- ========== JavaScript代码 ========== -->
     <script>
+        /* 
+         * 键盘控制功能
+         * 使用方向键控制机器人移动和转向
+         */
         // 键盘控制状态
         const keyState = {
             up: false,
@@ -462,6 +483,10 @@
         // 启动键盘控制循环
         keyboardControlLoop();
 
+        /* 
+         * C代码生成功能
+         * 根据用户操作生成对应的C代码命令
+         */
         // 生成C代码模板
         function generateCCode(action, params) {
             let code = `#include <stdio.h>
