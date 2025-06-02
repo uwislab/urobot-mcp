@@ -1,20 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- 
+    主页面 - Ollama调用界面
+    功能：
+    1. 提供Ollama API调用界面
+    2. 支持生成C代码和PlantUML
+    3. 机器人仿真入口
+    4. 语音输入功能
+    5. 历史记录管理
+-->
+<html lang="zh-CN">  <!-- 设置中文语言 -->
 
 <head>
-    <!-- 页面基础设置 -->
-    <meta charset="UTF-8">  <!-- 字符编码 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局 -->
+    <!-- ========== 页面元数据 ========== -->
+    <meta charset="UTF-8">  <!-- 设置UTF-8字符编码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局设置 -->
+    <meta name="description" content="Ollama API调用界面">  <!-- 页面描述 -->
     <title>调用Ollama - 首页</title>  <!-- 页面标题 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 页面整体样式 */
+        /* ========== 全局样式 ========== */
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;  /* 使用系统字体 */
-            background-image: url('static/background.png');  /* 背景图片 */
-            background-size: cover;  /* 背景图片覆盖整个页面 */
-            background-position: center;  /* 背景图片居中 */
-            background-attachment: fixed;  /* 背景图片固定 */
+            /* 字体设置 - 优先使用系统字体 */
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            
+            /* 背景设置 */
+            background-image: url('static/background.png');  /* 背景图片路径 */
+            background-size: cover;  /* 背景图片完全覆盖 */
+            background-position: center;  /* 背景图片居中显示 */
+            background-attachment: fixed;  /* 背景图片固定不滚动 */
+            background-repeat: no-repeat;  /* 背景图片不重复 */
+            
+            /* 布局设置 */
             display: flex;
             justify-content: center;  /* 水平居中 */
             align-items: center;  /* 垂直居中 */
@@ -291,10 +307,21 @@
 </head>
 
 <body>
+    <!-- ========== 主容器 ========== -->
     <div class="container">
+        <!-- 脚本按钮组 -->
         <div class="script-buttons">
-            <button id="runScript1" class="script-button">生成C代码(Ollama)</button>
-            <button id="runScript2" class="script-button">生成PlantUML(Ollama)</button>
+            <!-- 生成C代码按钮 -->
+            <button id="runScript1" class="script-button">
+                <i class="fas fa-code"></i> 生成C代码(Ollama)
+            </button>
+                
+            <!-- 生成PlantUML按钮 -->
+            <button id="runScript2" class="script-button">
+                <i class="fas fa-project-diagram"></i> 生成PlantUML(Ollama)
+            </button>
+                
+            <!-- 机器人仿真入口按钮 -->
             <button onclick="window.location.href='/robot'" class="script-button"
                     style="background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);">
                 <i class="fas fa-robot"></i> 机器人仿真
@@ -325,26 +352,49 @@
         <button id="clearHistoryButton" style="margin-top: 10px;">清空历史</button>
     </div>
 
+    <!-- ========== JavaScript代码 ========== -->
     <script>
-        // 获取DOM元素
-        const promptInput = document.getElementById('promptInput');
-        const callOllamaButton = document.getElementById('callOllamaButton');
-        const speechInputIcon = document.getElementById('speechInputIcon');
+        // 初始化DOM元素引用
+        const promptInput = document.getElementById('promptInput');  // 输入框
+        const callOllamaButton = document.getElementById('callOllamaButton');  // 发送按钮
+        const speechInputIcon = document.getElementById('speechInputIcon');  // 语音输入图标
+        const loader = document.getElementById('loader');  // 加载动画
+        const resultText = document.getElementById('resultText');  // 结果展示区域
 
-        // 语音输入功能
+        /* 
+         * 语音输入功能
+         * 使用Web Speech API实现语音转文字
+         * 支持中文语音识别
+         */
         speechInputIcon.addEventListener('click', function () {
+            // 检查浏览器是否支持语音识别
             if ('webkitSpeechRecognition' in window) {
+                // 创建语音识别实例
                 const recognition = new webkitSpeechRecognition();
-                recognition.lang = 'zh-CN';  // 设置语言为中文
+                
+                // 配置识别参数
+                recognition.lang = 'zh-CN';  // 设置中文识别
+                recognition.interimResults = false;  // 只返回最终结果
+                recognition.maxAlternatives = 1;  // 只返回最佳匹配
+                
+                // 识别结果处理
                 recognition.onresult = function (event) {
                     const transcript = event.results[0][0].transcript;
-                    // 去除句号并追加到现有内容
-                    const cleanText = transcript.replace(/。/g, '');
+                    // 清理识别结果：去除句号并合并到现有内容
+                    const cleanText = transcript.replace(/[。，、]/g, '');
                     promptInput.value = (promptInput.value + ' ' + cleanText).trim();
                 };
-                recognition.start();  // 开始语音识别
+                
+                // 错误处理
+                recognition.onerror = function(event) {
+                    console.error('语音识别错误:', event.error);
+                };
+                
+                // 开始语音识别
+                recognition.start();  
             } else {
-                alert('你的浏览器不支持语音识别功能。');
+                // 浏览器不支持语音识别的提示
+                alert('你的浏览器不支持语音识别功能，请使用Chrome或Edge浏览器。');
             }
         });
 
