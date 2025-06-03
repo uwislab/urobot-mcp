@@ -206,7 +206,7 @@ def robot_simulation():
     Returns:
         HTML: 渲染后的test.html模板
     """
-    logger.info("访问机器人仿真测试页面")
+    logger.info("访问机器人仿真页面")
     return render_template('robot/robot.html')
 
 @app.route('/robot-project/control')
