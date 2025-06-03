@@ -1,0 +1,38 @@
+{
+  "name": "picoc-js",
+  "version": "1.0.12",
+  "description": "a tiny c interpreter compiled to wasm",
+  "main": "dist/bundle.js",
+  "unpkg": "dist/bundle.umd.js",
+  "files": [
+    "dist/*"
+  ],
+  "type": "module",
+  "repository": "git@github.com:KritR/picoc-wasm.git",
+  "author": "Krithik Rao <krdevmail@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "clean": "rm -rf dist/*",
+    "build": "emmake make && rollup -c"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "rollup": "^2.39.1"
+  },
+  "keywords": [
+    "c",
+    "parser",
+    "interpreter",
+    "lang",
+    "vm",
+    "virtual machine",
+    "wasm",
+    "browser",
+    "node"
+  ],
+  "dependencies": {
+    "picoc-js": "^1.0.12"
+  }
+}

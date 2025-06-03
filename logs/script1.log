@@ -1,0 +1,7 @@
+2025-05-18 20:04:53,753 - __main__ - INFO - 开始生成C语言代码
+2025-05-18 20:04:57,817 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3:8b; provider = ollama
+2025-05-18 20:05:00,459 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-05-18 20:05:00,467 - LiteLLM - INFO - 
+LiteLLM completion() model= llama3:8b; provider = ollama
+2025-05-18 20:05:03,475 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"

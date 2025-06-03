@@ -243,14 +243,14 @@
                                color: white; padding: 12px 24px; border: none; border-radius: 12px;
                                cursor: pointer; font-weight: 600; transition: all 0.3s;
                                display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-map"></i> 地图1
+                    <i class="fas fa-map"></i> 普通地图
                 </button>
                 <button onclick="switchMap('map2')"
                         style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
                                color: white; padding: 12px 24px; border: none; border-radius: 12px;
                                cursor: pointer; font-weight: 600; transition: all 0.3s;
                                display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-map-marked-alt"></i> 地图2
+                    <i class="fas fa-map-marked-alt"></i> 障碍物地图
                 </button>
                 <button onclick="resetRobotPosition()"
                         style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
@@ -292,7 +292,7 @@
                     <div class="boundary" id="boundary-bottom"></div>
                     <div class="boundary" id="boundary-left"></div>
                     <div class="boundary" id="boundary-right"></div>
-                    <div id="robot" data-rotation="0" style="left: 30px; top: 120px; width: 120px; height: 60px; background-image: url('/static/robot.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; transition: all 0.5s ease; transform-origin: center;"></div>
+                    <div id="robot" data-rotation="0" style="left: 100px; top: 200px; width: 120px; height: 60px; background-image: url('/static/robot.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; transition: all 0.5s ease; transform-origin: center;"></div>
                     <!-- 地图1没有障碍物 -->
 
                     <div class="obstacle map2" style="left: 500px; top: 150px; display: none;"></div>
@@ -716,16 +716,22 @@ int main() {
             }
         }
 
-        // 地图配置
+        // 地图配置 - 统一初始位置
+        const INITIAL_X = 100;
+        const INITIAL_Y = 200;
+        const INITIAL_ANGLE = 0;
+        
         const mapConfigs = {
             map1: {
-                startX: 50,
-                startY: 120,
+                startX: INITIAL_X,
+                startY: INITIAL_Y,
+                startAngle: INITIAL_ANGLE,
                 obstacles: []
             },
             map2: {
-                startX: 50,
-                startY: 120,
+                startX: INITIAL_X,
+                startY: INITIAL_Y,
+                startAngle: INITIAL_ANGLE,
                 obstacles: [
                     {left: 500, top: 150},
                     {left: 350, top: 250}, 
@@ -773,12 +779,12 @@ int main() {
         function resetRobotPosition() {
             const robot = document.getElementById('robot');
             robot.style.transition = 'all 0.5s ease';
-            robot.style.left = '50px';
-            robot.style.top = '120px';
-            robot.style.transform = 'rotate(0deg)';
-            robot.dataset.rotation = '0';
+            robot.style.left = INITIAL_X + 'px';
+            robot.style.top = INITIAL_Y + 'px';
+            robot.style.transform = 'rotate(' + INITIAL_ANGLE + 'deg)';
+            robot.dataset.rotation = INITIAL_ANGLE;
 
-            updatePositionDisplay(50, 120, 0);
+            updatePositionDisplay(INITIAL_X, INITIAL_Y, INITIAL_ANGLE);
 
             document.getElementById('log').textContent +=
                 '机器人位置已重置到初始位置\n';
