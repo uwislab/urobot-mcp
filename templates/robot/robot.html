@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<!-- 
+    机器人仿真页面
+    功能：
+    1. 提供机器人仿真环境
+    2. 支持键盘和按钮控制机器人移动
+    3. 支持C代码命令执行
+    4. 提供地图切换功能
+    5. 实时显示机器人坐标和角度
+-->
+<html lang="zh-CN">
+<head>
+    <!-- ========== 页面元数据 ========== -->
+    <meta charset="UTF-8">  <!-- 设置UTF-8字符编码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局设置 -->
+    <meta name="description" content="机器人仿真控制界面">  <!-- 页面描述 -->
+    <title>仿真机器人</title>  <!-- 页面标题 -->
+    <!-- ========== 外部资源 ========== -->
+    <script src="/static/js/picoc-js/dist/bundle.umd.js" type="text/javascript"></script>  <!-- PicoC JS解释器 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  <!-- Font Awesome图标库 -->
+    
+    <!-- ========== 页面样式 ========== -->
+    <style>
+        /* ========== 基础样式 ========== */
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 1400px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        /* 控制组样式 */
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1.1rem;
+        }
+
+        .control-group h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover::after {
+            opacity: 1;
+        }
+
+        /* 输入框样式 */
+        .form-input {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+        }
+
+        /* 机器人仿真区域样式 */
+        #robotSimulation {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background-color: rgba(240, 240, 240, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .boundary {
+            position: absolute;
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+
+        #boundary-top {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        #boundary-bottom {
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        #boundary-left {
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        #boundary-right {
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+        }
+
+        /* 机器人样式 */
+        #robot {
+            position: absolute;
+            width: 120px;
+            height: 60px;
+            background-image: url('/static/robot.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: all 0.5s ease;
+            left: 50px;
+            top: 120px;
+            transform-origin: center;
+        }
+
+        /* 障碍物样式 */
+        .obstacle {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: red;
+            border-radius: 3px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+
+        /* 控制台样式 */
+        #console, #log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            height: 200px;
+            overflow: auto;
+            font-size: 1.1rem;
+        }
+
+        #console {
+            background: white;
+            color: black;
+        }
+
+        .command {
+            color: #0066cc;
+        }
+
+        /* 坐标显示样式 */
+        #positionDisplay {
+            background: linear-gradient(135deg, rgba(42,82,152,0.9) 0%, rgba(67,126,235,0.9) 100%);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .position-value {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ========== 顶部控制栏 ========== -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1><i class="fas fa-robot"></i> 仿真机器人</h1>  <!-- 页面标题 -->
+            <div style="display: flex; gap: 10px;">  <!-- 控制按钮组 -->
+                <button onclick="switchMap('map1')"
+                        style="background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+                               color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                               cursor: pointer; font-weight: 600; transition: all 0.3s;
+                               display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-map"></i> 普通地图
+                </button>
+                <button onclick="switchMap('map2')"
+                        style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                               color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                               cursor: pointer; font-weight: 600; transition: all 0.3s;
+                               display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-map-marked-alt"></i> 障碍物地图
+                </button>
+                <button onclick="resetRobotPosition()"
+                        style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+                               color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                               cursor: pointer; font-weight: 600; transition: all 0.3s;
+                               display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-sync-alt"></i> 重置位置
+                </button>
+                <button onclick="window.location.href='/'"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                               color: white; padding: 12px 24px; border: none; border-radius: 12px;
+                               cursor: pointer; font-weight: 600; transition: all 0.3s;
+                               display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-home"></i> 返回首页
+                </button>
+            </div>
+        </div>
+
+        <!-- ========== 主内容区域 ========== -->
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+            <!-- ========== 机器人仿真区域 ========== -->
+            <div class="simulation-panel">
+                <div id="positionDisplay">
+                    <div>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>X: <span id="robotX" class="position-value">50</span> px</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Y: <span id="robotY" class="position-value">120</span> px</span>
+                    </div>
+                    <div>
+                        <i class="fas fa-compass"></i>
+                        <span>角度: <span id="robotAngle" class="position-value">0</span>°</span>
+                    </div>
+                </div>
+                <div id="robotSimulation">
+                    <div class="boundary" id="boundary-top"></div>
+                    <div class="boundary" id="boundary-bottom"></div>
+                    <div class="boundary" id="boundary-left"></div>
+                    <div class="boundary" id="boundary-right"></div>
+                    <div id="robot" data-rotation="0" style="left: 100px; top: 200px; width: 120px; height: 60px; background-image: url('/static/robot.png'); background-size: contain; background-repeat: no-repeat; background-position: center; position: absolute; transition: all 0.5s ease; transform-origin: center;"></div>
+                    <!-- 地图1没有障碍物 -->
+
+                    <div class="obstacle map2" style="left: 500px; top: 150px; display: none;"></div>
+                   <!-- 地图2障碍物 <div class="obstacle map2" style="left: 350px; top: 250px; display: none;"></div> -->
+                    <!-- 地图2障碍物<div class="obstacle map2" style="left: 250px; top: 50px; display: none;"></div> -->
+                </div>
+            </div>
+
+            <!-- 控制面板和输出区域 -->
+            <div class="control-panel">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">前进控制</h3>
+                            <div>速度: <input type="number" id="forwardSpeed" min="1" max="8" value="4" style="font-size: 1.1rem;"></div>
+                            <div>距离: <input type="number" id="forwardDistance" min="1" max="200" value="50" style="font-size: 1.1rem;"></div>
+                            <button onclick="executeCommand('forward')" class="btn">前进</button>
+                        </div>
+
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">后退控制</h3>
+                            <div>速度: <input type="number" id="backSpeed" min="1" max="8" value="4" style="font-size: 1.1rem;"></div>
+                            <div>距离: <input type="number" id="backDistance" min="1" max="200" value="50" style="font-size: 1.1rem;"></div>
+                            <button onclick="executeCommand('back')" class="btn">后退</button>
+                        </div>
+
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">转向控制</h3>
+                            <div>角度: <input type="number" id="turnDegree" min="1" max="360" value="90" style="font-size: 1.1rem;"></div>
+                            <div>
+                                <button onclick="executeCommand('left')" class="btn">左转</button>
+                                <button onclick="executeCommand('right')" class="btn">右转</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">控制台输出</h3>
+                            <pre id="log"></pre>
+                        </div>
+
+                        <div class="control-group" style="font-size: 1.1rem;">
+                            <h3 style="font-size: 1.3rem;">C语言命令</h3>
+                            <div id="console" style="background: white; color: black;">
+                                <div>// 机器人控制命令记录</div>
+                                <div>void main() {</div>
+                                <div id="commandLog"></div>
+                                <div>}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== JavaScript代码 ========== -->
+    <script>
+        /* 
+         * 键盘控制功能
+         * 使用方向键控制机器人移动和转向
+         */
+        // 键盘控制状态
+        const keyState = {
+            up: false,
+            down: false,
+            left: false,
+            right: false
+        };
+
+        // 碰撞检测状态
+        let collisionDetectionEnabled = true;
+
+        // 键盘事件监听
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                    keyState.up = true;
+                    break;
+                case 'ArrowDown':
+                    keyState.down = true;
+                    break;
+                case 'ArrowLeft':
+                    keyState.left = true;
+                    break;
+                case 'ArrowRight':
+                    keyState.right = true;
+                    break;
+            }
+            e.preventDefault(); // 防止页面滚动
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                    keyState.up = false;
+                    break;
+                case 'ArrowDown':
+                    keyState.down = false;
+                    break;
+                case 'ArrowLeft':
+                    keyState.left = false;
+                    break;
+                case 'ArrowRight':
+                    keyState.right = false;
+                    break;
+            }
+        });
+
+        // 键盘控制循环
+        function keyboardControlLoop() {
+            const robot = document.getElementById('robot');
+            const speed = 2; // 移动速度
+            const rotationSpeed = 2; // 旋转速度(度/帧)
+
+            // 处理旋转
+            if (keyState.left) {
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                const newRot = (currentRot - rotationSpeed) % 360;
+                robot.style.transform = `rotate(${newRot}deg)`;
+                robot.dataset.rotation = newRot;
+            }
+            if (keyState.right) {
+                const currentRot = parseInt(robot.dataset.rotation || '0');
+                const newRot = (currentRot + rotationSpeed) % 360;
+                robot.style.transform = `rotate(${newRot}deg)`;
+                robot.dataset.rotation = newRot;
+            }
+
+            // 处理移动
+            if (keyState.up || keyState.down) {
+                const currentLeft = parseFloat(robot.style.left || '50');
+                const currentTop = parseFloat(robot.style.top || '120');
+                const rotation = parseFloat(robot.dataset.rotation || '0');
+                const radians = rotation * Math.PI / 180;
+
+                // 计算移动方向 (前进或后退)
+                const direction = keyState.up ? 1 : -1;
+                const deltaX = Math.cos(radians) * speed * direction;
+                const deltaY = Math.sin(radians) * speed * direction;
+
+                // 计算新位置
+                let newLeft = currentLeft + deltaX;
+                let newTop = currentTop + deltaY;
+
+                // 边界检查
+                const sim = document.getElementById('robotSimulation');
+                const robotWidth = robot.offsetWidth;
+                const robotHeight = robot.offsetHeight;
+
+                if (newLeft < 0) newLeft = 0;
+                if (newLeft > sim.offsetWidth - robotWidth) newLeft = sim.offsetWidth - robotWidth;
+                if (newTop < 0) newTop = 0;
+                if (newTop > sim.offsetHeight - robotHeight) newTop = sim.offsetHeight - robotHeight;
+
+                // 应用新位置 (无过渡动画)
+                robot.style.transition = 'none';
+                robot.style.left = newLeft + 'px';
+                robot.style.top = newTop + 'px';
+
+                // 更新坐标显示
+                updatePositionDisplay(newLeft, newTop, rotation);
+            }
+
+            // 检查碰撞
+            const hit = checkCollision(robot);
+            if (hit.hitObstacle) {
+                // 碰到障碍物时回退一步
+                const currentLeft = parseFloat(robot.style.left || '50');
+                const currentTop = parseFloat(robot.style.top || '120');
+                const rotation = parseFloat(robot.dataset.rotation || '0');
+                const radians = rotation * Math.PI / 180;
+
+                // 回退方向 (与移动方向相反)
+                const direction = keyState.up ? -1 : 1;
+                const deltaX = Math.cos(radians) * speed * direction;
+                const deltaY = Math.sin(radians) * speed * direction;
+
+                robot.style.left = (currentLeft + deltaX) + 'px';
+                robot.style.top = (currentTop + deltaY) + 'px';
+            }
+
+            requestAnimationFrame(keyboardControlLoop);
+        }
+
+        // 启动键盘控制循环
+        keyboardControlLoop();
+
+        /* 
+         * C代码生成功能
+         * 根据用户操作生成对应的C代码命令
+         */
+        // 生成C代码模板
+        function generateCCode(action, params) {
+            let code = `#include <stdio.h>
+#include <math.h>
+
+// 机器人状态
+typedef struct {
+    float x;
+    float y;
+    float rotation;
+} RobotState;
+
+RobotState robot;
+robot.x = 50.0;
+robot.y = 120.0;
+robot.rotation = 0.0;
+
+void update_robot_position(float deltaX, float deltaY) {
+    robot.x += deltaX;
+    robot.y += deltaY;
+
+    // 边界检查
+    if (robot.x < 5) robot.x = 5;
+    if (robot.x > 795) robot.x = 795;
+    if (robot.y < 5) robot.y = 5;
+    if (robot.y > 495) robot.y = 495;
+}
+
+void forward(int speed, int distance) {
+    printf("机器人以速度 %d 前进 %d 距离\\n", speed, distance);
+
+    // 计算移动距离
+    float radians = robot.rotation * M_PI / 180.0;
+    float deltaX = cos(radians) * distance;
+    float deltaY = sin(radians) * distance;
+
+    update_robot_position(deltaX, deltaY);
+}
+
+void back(int speed, int distance) {
+    printf("机器人以速度 %d 后退 %d 距离\\n", speed, distance);
+
+    // 计算移动距离 (反向)
+    float radians = robot.rotation * M_PI / 180.0;
+    float deltaX = -cos(radians) * distance;
+    float deltaY = -sin(radians) * distance;
+
+    update_robot_position(deltaX, deltaY);
+}
+
+void turn_left(int degree) {
+    printf("机器人左转 %d 度\\n", degree);
+    robot.rotation = fmod(robot.rotation - degree, 360.0);
+}
+
+void turn_right(int degree) {
+    printf("机器人右转 %d 度\\n", degree);
+    robot.rotation = fmod(robot.rotation + degree, 360.0);
+}
+
+int main() {
+    // 初始化机器人状态
+    robot.x = 50.0;
+    robot.y = 120.0;
+    robot.rotation = 0.0;
+
+    `;
+
+            switch(action) {
+                case 'forward':
+                    code += `forward(${params.speed}, ${params.distance});`;
+                    break;
+                case 'back':
+                    code += `back(${params.speed}, ${params.distance});`;
+                    break;
+                case 'left':
+                    code += `turn_left(${params.degree});`;
+                    break;
+                case 'right':
+                    code += `turn_right(${params.degree});`;
+                    break;
+            }
+
+            code += `
+    return 0;
+}`;
+
+            return code;
+        }
+
+        // 执行C代码命令
+        function executeCommand(action) {
+            const robot = document.getElementById('robot');
+            let cCode = '';
+            let command = '';
+
+            // 获取参数并生成C代码
+            switch(action) {
+                case 'forward':
+                    const forwardSpeed = parseInt(document.getElementById('forwardSpeed').value);
+                    const forwardDistance = parseInt(document.getElementById('forwardDistance').value);
+                    cCode = generateCCode('forward', {speed: forwardSpeed, distance: forwardDistance});
+                    command = `    forward(${forwardSpeed}, ${forwardDistance});`;
+                    moveRobotWithRotation(robot, forwardDistance, forwardSpeed);
+                    break;
+
+                case 'back':
+                    const backSpeed = parseInt(document.getElementById('backSpeed').value);
+                    const backDistance = parseInt(document.getElementById('backDistance').value);
+                    cCode = generateCCode('back', {speed: backSpeed, distance: backDistance});
+                    command = `    back(${backSpeed}, ${backDistance});`;
+                    moveRobotWithRotation(robot, -backDistance, backSpeed);
+                    break;
+
+                case 'left':
+                    const leftDegree = parseInt(document.getElementById('turnDegree').value);
+                    cCode = generateCCode('left', {degree: leftDegree});
+                    command = `    turn_left(${leftDegree});`;
+                    const currentRot = parseInt(robot.dataset.rotation || '0');
+                    const newRot = (currentRot - leftDegree) % 360;
+                    robot.style.transform = `rotate(${newRot}deg)`;
+                    robot.dataset.rotation = newRot;
+                    updatePositionDisplay(
+                        parseFloat(robot.style.left || '50'),
+                        parseFloat(robot.style.top || '120'),
+                        newRot
+                    );
+                    break;
+
+                case 'right':
+                    const rightDegree = parseInt(document.getElementById('turnDegree').value);
+                    cCode = generateCCode('right', {degree: rightDegree});
+                    command = `    turn_right(${rightDegree});`;
+                    const rightCurrentRot = parseInt(robot.dataset.rotation || '0');
+                    const rightNewRot = (rightCurrentRot + rightDegree) % 360;
+                    robot.style.transform = `rotate(${rightNewRot}deg)`;
+                    robot.dataset.rotation = rightNewRot;
+                    updatePositionDisplay(
+                        parseFloat(robot.style.left || '50'),
+                        parseFloat(robot.style.top || '120'),
+                        rightNewRot
+                    );
+                    break;
+            }
+
+            // 执行C代码并更新机器人位置
+            picocjs.runC(cCode, (output) => {
+                const logElement = document.getElementById('log');
+                logElement.textContent += output + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+
+                // 从C代码执行结果中获取机器人状态
+                const robotState = picocjs.getGlobal('robot');
+                if (robotState) {
+                    const robot = document.getElementById('robot');
+                    robot.style.left = robotState.x + 'px';
+                    robot.style.top = robotState.y + 'px';
+                    robot.style.transform = `rotate(${robotState.rotation}deg)`;
+                    robot.dataset.rotation = robotState.rotation;
+                }
+            });
+
+            // 记录C语言命令
+            if (command) {
+                const commandLog = document.getElementById('commandLog');
+                const commandElement = document.createElement('div');
+                commandElement.className = 'command';
+                commandElement.textContent = command;
+                commandLog.appendChild(commandElement);
+                commandLog.scrollTop = commandLog.scrollHeight;
+            }
+        }
+
+        // 精确碰撞检测 (返回碰撞信息)
+        function checkCollision(robot) {
+            if (!collisionDetectionEnabled) {
+                return {
+                    hitLeft: false,
+                    hitRight: false,
+                    hitTop: false,
+                    hitBottom: false,
+                    hitObstacle: false
+                };
+            }
+            const sim = document.getElementById('robotSimulation');
+            const simRect = sim.getBoundingClientRect();
+            const robotRect = robot.getBoundingClientRect();
+
+            // 边界检测
+            const hitLeft = robotRect.left <= simRect.left;
+            const hitRight = robotRect.right >= simRect.right;
+            const hitTop = robotRect.top <= simRect.top;
+            const hitBottom = robotRect.bottom >= simRect.bottom;
+
+            // 障碍物检测
+            let hitObstacle = false;
+            const obstacles = document.querySelectorAll('.obstacle');
+            obstacles.forEach(obstacle => {
+                const obstacleRect = obstacle.getBoundingClientRect();
+                if (!(
+                    robotRect.right < obstacleRect.left ||
+                    robotRect.left > obstacleRect.right ||
+                    robotRect.bottom < obstacleRect.top ||
+                    robotRect.top > obstacleRect.bottom
+                )) {
+                    hitObstacle = true;
+                    // 记录碰撞
+                    document.getElementById('log').textContent +=
+                        `机器人碰撞到障碍物，已停止\n`;
+                }
+            });
+
+            return { hitLeft, hitRight, hitTop, hitBottom, hitObstacle };
+        }
+
+        // 处理边界碰撞
+        function handleBoundaryCollision(robot, hit) {
+            // 记录碰撞信息
+            if (hit.hitLeft) {
+                document.getElementById('log').textContent += `机器人碰撞到左边界，已停止\n`;
+            } else if (hit.hitRight) {
+                document.getElementById('log').textContent += `机器人碰撞到右边界，已停止\n`;
+            } else if (hit.hitTop) {
+                document.getElementById('log').textContent += `机器人碰撞到上边界，已停止\n`;
+            } else if (hit.hitBottom) {
+                document.getElementById('log').textContent += `机器人碰撞到下边界，已停止\n`;
+            }
+        }
+
+        // 地图配置 - 统一初始位置
+        const INITIAL_X = 100;
+        const INITIAL_Y = 200;
+        const INITIAL_ANGLE = 0;
+        
+        const mapConfigs = {
+            map1: {
+                startX: INITIAL_X,
+                startY: INITIAL_Y,
+                startAngle: INITIAL_ANGLE,
+                obstacles: []
+            },
+            map2: {
+                startX: INITIAL_X,
+                startY: INITIAL_Y,
+                startAngle: INITIAL_ANGLE,
+                obstacles: [
+                    {left: 500, top: 150},
+                    {left: 350, top: 250}, 
+                    {left: 250, top: 50}
+                ]
+            }
+        };
+
+        // 切换地图
+        function switchMap(mapName) {
+            // 禁用碰撞检测
+            collisionDetectionEnabled = false;
+
+            const config = mapConfigs[mapName];
+
+            // 重置机器人位置
+            const robot = document.getElementById('robot');
+            robot.style.left = config.startX + 'px';
+            robot.style.top = config.startY + 'px';
+            robot.style.transform = 'rotate(0deg)';
+            robot.dataset.rotation = '0';
+
+            // 更新坐标显示
+            updatePositionDisplay(config.startX, config.startY, 0);
+
+            // 切换障碍物显示
+            document.querySelectorAll('.obstacle').forEach(ob => {
+                ob.style.display = 'none';
+            });
+            document.querySelectorAll('.obstacle.' + mapName).forEach(ob => {
+                ob.style.display = 'block';
+            });
+
+            // 记录地图切换
+            document.getElementById('log').textContent +=
+                `已切换到${mapName === 'map1' ? '地图1' : '地图2'}\n`;
+
+            // 重新启用碰撞检测
+            setTimeout(() => {
+                collisionDetectionEnabled = true;
+            }, 1000);
+        }
+
+        // 重置机器人位置
+        function resetRobotPosition() {
+            const robot = document.getElementById('robot');
+            robot.style.transition = 'all 0.5s ease';
+            robot.style.left = INITIAL_X + 'px';
+            robot.style.top = INITIAL_Y + 'px';
+            robot.style.transform = 'rotate(' + INITIAL_ANGLE + 'deg)';
+            robot.dataset.rotation = INITIAL_ANGLE;
+
+            updatePositionDisplay(INITIAL_X, INITIAL_Y, INITIAL_ANGLE);
+
+            document.getElementById('log').textContent +=
+                '机器人位置已重置到初始位置\n';
+        }
+
+        // 更新坐标显示
+        function updatePositionDisplay(x, y, angle) {
+            document.getElementById('robotX').textContent = Math.round(x);
+            document.getElementById('robotY').textContent = Math.round(y);
+            document.getElementById('robotAngle').textContent = Math.round(angle);
+        }
+
+        // 根据旋转角度计算并移动机器人
+        function moveRobotWithRotation(robot, distance, speed) {
+            // 获取当前位置和旋转角度
+            const currentLeft = parseFloat(robot.style.left || '50');
+            const currentTop = parseFloat(robot.style.top || '120');
+            const rotation = parseFloat(robot.dataset.rotation || '0');
+
+            // 将角度转换为弧度
+            const radians = rotation * Math.PI / 180;
+
+            // 计算基于角度的X和Y方向的移动距离
+            const deltaX = Math.cos(radians) * distance;
+            const deltaY = Math.sin(radians) * distance;
+
+            // 计算新位置
+            let newLeft = currentLeft + deltaX;
+            let newTop = currentTop + deltaY;
+
+            // 获取仿真区域尺寸
+            const sim = document.getElementById('robotSimulation');
+            const simWidth = sim.offsetWidth;
+            const simHeight = sim.offsetHeight;
+            const robotWidth = robot.offsetWidth;
+            const robotHeight = robot.offsetHeight;
+
+            // 边界检查和调整
+            if (newLeft < 5) newLeft = 5;
+            if (newLeft + robotWidth > simWidth - 5) newLeft = simWidth - robotWidth - 5;
+            if (newTop < 5) newTop = 5;
+            if (newTop + robotHeight > simHeight - 5) newTop = simHeight - robotHeight - 5;
+
+            // 计算动画持续时间
+            const duration = Math.abs(distance) / (speed * 10);
+
+            // 设置过渡效果并应用新位置
+            robot.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+            robot.style.left = newLeft + 'px';
+            robot.style.top = newTop + 'px';
+
+            // 更新坐标显示
+            updatePositionDisplay(newLeft, newTop, rotation);
+
+            // 记录移动信息
+            document.getElementById('log').textContent +=
+                `机器人向${rotation}度方向移动了${distance > 0 ? '前' : '后'}${Math.abs(distance)}单位\n`;
+
+            // 使用requestAnimationFrame进行逐帧碰撞检测
+            let animationId;
+            let lastTime = 0;
+            const checkCollisionFrame = (timestamp) => {
+                if (!lastTime) lastTime = timestamp;
+                const elapsed = timestamp - lastTime;
+                
+                // 每16ms检查一次碰撞(约60fps)
+                if (elapsed >= 16) {
+                    const hit = checkCollision(robot);
+                    if (hit.hitObstacle || hit.hitLeft || hit.hitRight || hit.hitTop || hit.hitBottom) {
+                        // 立即停止动画和移动
+                        cancelAnimationFrame(animationId);
+                        robot.style.transition = 'none';
+                        robot.style.left = robot.style.left;
+                        robot.style.top = robot.style.top;
+                        
+                        // 记录碰撞信息
+                        if (hit.hitObstacle) {
+                            document.getElementById('log').textContent +=
+                                `碰撞到障碍物，运动命令已终止\n`;
+                        } else {
+                            handleBoundaryCollision(robot, hit);
+                        }
+                        return;
+                    }
+                    lastTime = timestamp;
+                }
+                animationId = requestAnimationFrame(checkCollisionFrame);
+            };
+            animationId = requestAnimationFrame(checkCollisionFrame);
+
+            // 移动结束后清除检查
+            robot.addEventListener('transitionend', () => {
+                cancelAnimationFrame(animationId);
+            }, { once: true });
+        }
+    </script>
+</body>
+</html>

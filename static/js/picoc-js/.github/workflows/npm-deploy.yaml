@@ -1,0 +1,43 @@
+name: NPM Deploy Package
+
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Setup emsdk
+      uses: mymindstorm/setup-emsdk@v7
+      with:
+        # Make sure to set a version number!
+        version: 1.39.15
+        # This is the name of the cache folder.
+        # The cache folder will be placed in the build directory,
+        #  so make sure it doesn't conflict with anything!
+        actions-cache-folder: 'emsdk-cache'
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - run: yarn install
+    - run: yarn run build
+    - run: yarn publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+

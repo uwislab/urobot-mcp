@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<!-- 
+    Deepseek功能页面
+    功能：
+    1. 提供Deepseek API调用界面
+    2. 支持生成C代码和PlantUML
+    3. 语音输入功能
+    4. 历史记录管理
+    5. 返回首页功能
+-->
+<html lang="zh-CN">  <!-- 设置中文语言 -->
+
+<head>
+    <!-- ========== 页面元数据 ========== -->
+    <meta charset="UTF-8">  <!-- 设置UTF-8字符编码 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- 响应式布局设置 -->
+    <meta name="description" content="Deepseek API调用界面">  <!-- 页面描述 -->
+    <title>Deepseek功能页面</title>  <!-- 页面标题 -->
+    <style>
+        /* ========== 全局样式 ========== */
+        body {
+            /* 字体设置 - 优先使用系统字体 */
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            
+            /* 背景设置 */
+            background-image: url('../static/deepseek_logo.png');  /* 背景图片路径 */
+            background-size: cover;  /* 背景图片完全覆盖 */
+            background-position: center;  /* 背景图片居中显示 */
+            background-attachment: fixed;  /* 背景图片固定不滚动 */
+            background-repeat: no-repeat;  /* 背景图片不重复 */
+            
+            /* 布局设置 */
+            display: flex;
+            justify-content: center;  /* 水平居中 */
+            align-items: center;  /* 垂直居中 */
+            min-height: 100vh;  /* 最小高度为视口高度 */
+            margin: 0;
+            padding: 20px;  /* 内边距 */
+        }
+
+        /* 内容容器样式 */
+        .container {
+            background: rgba(255, 255, 255, 0.92);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        h2 {
+            color: #2a5298;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            min-width: 120px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        button:hover::after {
+            opacity: 1;
+        }
+
+        /* 输出区域样式 */
+        #output {
+            margin-top: 1.5rem;  /* 上边距 */
+            padding: 1.5rem;  /* 内边距 */
+            background: #f8f9fa;  /* 浅灰色背景 */
+            border-radius: 8px;  /* 圆角 */
+            border: 1px solid #e0e0e0;  /* 边框 */
+            min-height: 200px;  /* 最小高度 */
+            max-height: 500px;  /* 最大高度 */
+            overflow-y: auto;  /* 垂直滚动 */
+            white-space: pre-wrap;  /* 保留空白和换行 */
+            font-family: 'Consolas', monospace;  /* 等宽字体 */
+            text-align: left;  /* 左对齐 */
+            position: relative;  /* 相对定位 */
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        #result {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Deepseek</h2>
+        <div class="button-group">
+            <button id="runScript3Button" onclick="runScript('/run_script3')">生成C代码(DeepSeek)</button>
+            <button id="runScript4Button" onclick="runScript('/run_script4')">生成PlantUML(DeepSeek)</button>
+            <button onclick="window.location.href='/'">返回首页</button>
+            <button id="showHistoryButton">历史</button>
+            <button id="voiceInputButton" style="min-width: 40px; width: 40px; padding: 0; background: transparent; border: none;">
+                <img src="../static/microphone.png" alt="语音输入" style="width: 24px; height: 24px;">
+            </button>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <textarea id="promptInput" style="width: 100%; height: 20px; padding: 10px;"
+                placeholder="请输入你的需求描述..."></textarea>
+        </div>
+        <div id="output" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; text-align: left; white-space: pre-wrap;">
+            <div class="loader" id="loader"></div>
+            <pre id="result" style="margin: 0;"></pre>
+        </div>
+        <!-- 历史记录面板 -->
+        <div id="historyPanel" style="display: none; margin-top: 20px;">
+            <h3>历史记录</h3>
+            <div id="historyList" style="max-height: 300px; overflow-y: auto;"></div>
+            <button id="clearHistoryButton" style="margin-top: 10px; background: #dc3545;">清空历史</button>
+        </div>
+    </div>
+
+    <script>
+        /* 
+         * 历史记录功能
+         * 使用localStorage存储API调用历史
+         * 支持查看、删除历史记录
+         */
+        const HISTORY_KEY = 'scriptHistory';  // localStorage键名
+
+        // 加载历史记录
+        // 按时间倒序显示最近的10条记录
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            historyList.innerHTML = history.map((item, index) => `
+                <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 5px;">
+                    <div><strong>${new Date(item.timestamp).toLocaleString()}</strong></div>
+                    <div><strong>请求:</strong> ${item.endpoint}</div>
+                    <div><strong>输入:</strong> ${item.prompt}</div>
+                    <div><strong>结果:</strong> ${item.result.substring(0, 100)}${item.result.length > 100 ? '...' : ''}</div>
+                    <div style="margin-top: 5px; display: flex; gap: 5px;">
+                        <button onclick="showHistoryDetail(${index})" style="padding: 2px 5px; font-size: 12px;">查看详情</button>
+                        <button onclick="deleteHistoryItem(${index})" style="padding: 2px 5px; font-size: 12px; background: #dc3545; color: white; border: none;">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 显示历史详情history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        function showHistoryDetail(index) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            const item = history[index];
+            if (item) {
+                resultText.innerText = `[${new Date(item.timestamp).toLocaleString()}]\n请求: ${item.endpoint}\n输入: ${item.prompt}\n\n结果:\n${item.result}`;
+            }
+        }
+
+        // 添加历史记录
+        function addHistory(endpoint, prompt, result) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            history.unshift({
+                timestamp: new Date().toISOString(),
+                endpoint,
+                prompt,
+                result
+            });
+            // 只保留最近10条记录
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 10)));
+            loadHistory();
+        }
+
+        // 切换历史记录面板显示
+        document.getElementById('showHistoryButton').addEventListener('click', () => {
+            const panel = document.getElementById('historyPanel');
+            if (panel.style.display === 'none') {
+                loadHistory();
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        });
+
+        // 删除单条历史记录
+        function deleteHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            history.splice(index, 1);
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            loadHistory();
+        }
+
+        // 清除历史记录
+        document.getElementById('clearHistoryButton').addEventListener('click', () => {
+            if (confirm('确定要清空所有历史记录吗？')) {
+                localStorage.removeItem(HISTORY_KEY);
+                document.getElementById('historyList').innerHTML = '<div>无历史记录</div>';
+            }
+        });
+        // 获取DOM元素
+        const runScript3Button = document.getElementById('runScript3Button');
+        const runScript4Button = document.getElementById('runScript4Button');
+        const resultText = document.getElementById('result');
+
+        /* 
+         * 运行脚本函数
+         * 调用后端API执行脚本
+         * 参数: endpoint - API端点路径
+         * 功能: 显示加载状态、处理响应、错误处理和保存历史记录
+         */
+        async function runScript(endpoint) {
+            try {
+                // 显示加载动画
+                const loader = document.getElementById('loader');
+                loader.style.display = 'block';
+                resultText.innerText = '';  // 清空结果
+
+                // 获取用户输入
+                const promptInput = document.getElementById('promptInput');
+                const userPrompt = promptInput.value.trim();
+
+                // 发送POST请求
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: userPrompt || '请生成相关代码'
+                    })
+                });
+                const data = await response.json();  // 解析响应
+
+                // 处理响应数据
+                console.log("API响应数据:", data);  // 调试日志
+                let output = "";
+
+                // 检查不同可能的返回字段
+                if (data.result) {
+                    output = data.result;
+                } else if (data.message) {
+                    output = data.message;
+                } else if (data.error) {
+                    output = "错误: " + data.error;
+                } else if (data.choices && data.choices[0] && data.choices[0].message) {
+                    // 处理Deepseek API的直接响应
+                    output = data.choices[0].message.content;
+                } else {
+                    output = "原始响应数据:\n" + JSON.stringify(data, null, 2);
+                }
+
+                // 隐藏加载动画
+                loader.style.display = 'none';
+
+                // 显示结果
+                resultText.innerText = output;
+                // 保存到历史记录
+                addHistory(endpoint, userPrompt, output);
+            } catch (error) {
+                // 处理异常
+                console.error("请求出错:", error);  // 调试日志
+                loader.style.display = 'none';
+                let errorMsg = `请求出错: ${error.message}\n`;
+                if (error.response) {
+                    errorMsg += `状态码: ${error.response.status}\n`;
+                    try {
+                        errorMsg += `响应数据: ${JSON.stringify(await error.response.json(), null, 2)}`;
+                    } catch (e) {
+                        errorMsg += `无法解析响应数据: ${e.message}`;
+                    }
+                }
+                resultText.innerText = errorMsg;
+            }
+        }
+
+        /* 
+         * 语音识别功能
+         * 使用Web Speech API实现语音转文字
+         * 支持中文语音输入
+         */
+        const voiceInputButton = document.getElementById('voiceInputButton');
+        const promptInput = document.getElementById('promptInput');
+        let recognition = null;  // 语音识别实例
+        let isListening = false;  // 监听状态标志
+
+        // 检查浏览器是否支持语音识别API
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'zh-CN';
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // 追加到输入框，不清空原有内容
+                promptInput.value += finalTranscript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('语音识别错误:', event.error);
+                voiceInputButton.style.background = '#dc3545';
+                setTimeout(() => {
+                    voiceInputButton.style.background = isListening ? '#1e3c72' : '#2a5298';
+                }, 1000);
+            };
+
+            recognition.onend = () => {
+                if (isListening) {
+                    recognition.start(); // 自动重新开始
+                }
+            };
+
+            voiceInputButton.addEventListener('click', () => {
+                isListening = !isListening;
+
+                if (isListening) {
+                    recognition.start();
+                    voiceInputButton.innerHTML = `
+                        <img src="../static/microphone.png" alt="语音输入中" style="width: 24px; height: 24px;">
+                    `;
+                } else {
+                    recognition.stop();
+                    voiceInputButton.innerHTML = `
+                        <img src="../static/microphone.png" alt="语音输入" style="width: 24px; height: 24px;">
+                    `;
+                }
+            });
+        } else {
+            voiceInputButton.style.display = 'none';
+            console.warn('该浏览器不支持语音识别API');
+        }
+
+        // 初始化页面时加载历史记录
+        loadHistory();
+
+    </script>
+</body>
+
+</html>
